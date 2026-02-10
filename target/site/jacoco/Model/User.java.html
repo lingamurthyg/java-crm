@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>User.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Java CRM Application</a> &gt; <a href="index.source.html" class="el_package">Model</a> &gt; <span class="el_source">User.java</span></div><h1>User.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package Model;
+
+import java.time.LocalDateTime;
+
+/**
+ *
+ * @author Austin Wong
+ */
+public class User {
+    
+    //&lt;editor-fold defaultstate=&quot;collapsed&quot; desc=&quot;static variables and methods&quot;&gt;
+    private static User currentUser;
+    
+    public static User getCurrentUser(){
+<span class="fc" id="L20">        return currentUser;</span>
+    }
+    
+    public static void setCurrentUser(User user){
+<span class="fc" id="L24">        currentUser = user;</span>
+<span class="fc" id="L25">    }</span>
+    //&lt;/editor-fold&gt;
+    
+    //&lt;editor-fold defaultstate=&quot;collapsed&quot; desc=&quot;db variables&quot;&gt;
+    private int userId;
+    private String userName;
+    private String password;
+    private boolean active;
+    private LocalDateTime createDate;
+    private String createdBy;
+    private LocalDateTime lastUpdate;
+    private String lastUpdateBy;
+    //&lt;/editor-fold&gt;
+    
+    // Constructor
+<span class="fc" id="L40">    public User(int userId, String userName, String password, boolean active, LocalDateTime createDate, String createdBy, LocalDateTime lastUpdate, String lastUpdateBy){</span>
+<span class="fc" id="L41">        this.userId = userId;</span>
+<span class="fc" id="L42">        this.userName = userName;</span>
+<span class="fc" id="L43">        this.password = password;</span>
+<span class="fc" id="L44">        this.active = active;</span>
+<span class="fc" id="L45">        this.createDate = createDate;</span>
+<span class="fc" id="L46">        this.createdBy = createdBy;</span>
+<span class="fc" id="L47">        this.lastUpdate = lastUpdate;</span>
+<span class="fc" id="L48">        this.lastUpdateBy = lastUpdateBy;</span>
+<span class="fc" id="L49">    }</span>
+    
+    //&lt;editor-fold defaultstate=&quot;collapsed&quot; desc=&quot;db variable setters and getters&quot;&gt;
+    public int getUserId(){
+<span class="fc" id="L53">        return userId;</span>
+    }
+    
+    public void setUserId(int userId){
+<span class="fc" id="L57">        this.userId = userId;</span>
+<span class="fc" id="L58">    }</span>
+    
+    public String getUserName(){
+<span class="fc" id="L61">        return userName;</span>
+    }
+    
+    public void setUserName(String userName){
+<span class="fc" id="L65">        this.userName = userName;</span>
+<span class="fc" id="L66">    }</span>
+    
+    public String getPassword(){
+<span class="fc" id="L69">        return password;</span>
+    }
+    
+    public void setPassword(String password){
+<span class="fc" id="L73">        this.password = password;</span>
+<span class="fc" id="L74">    }</span>
+    
+    public boolean isActive(){
+<span class="fc" id="L77">        return active;</span>
+    }
+    
+    public void setActive(boolean active){
+<span class="fc" id="L81">        this.active = active;</span>
+<span class="fc" id="L82">    }</span>
+    
+    public LocalDateTime getCreateDate(){
+<span class="fc" id="L85">        return createDate;</span>
+    }
+    
+    public void setCreateDate(LocalDateTime createDate){
+<span class="fc" id="L89">        this.createDate = createDate;</span>
+<span class="fc" id="L90">    }</span>
+    
+    public String getCreatedBy(){
+<span class="fc" id="L93">        return createdBy;</span>
+    }
+    
+    public void setCreatedBy(String createdBy){
+<span class="fc" id="L97">        this.createdBy = createdBy;</span>
+<span class="fc" id="L98">    }</span>
+    
+    public LocalDateTime getLastUpdate(){
+<span class="fc" id="L101">        return lastUpdate;</span>
+    }
+    
+    public void setLastUpdate(LocalDateTime lastUpdate){
+<span class="fc" id="L105">        this.lastUpdate = lastUpdate;</span>
+<span class="fc" id="L106">    }</span>
+    
+    public String getLastUpdateBy(){
+<span class="fc" id="L109">        return lastUpdateBy;</span>
+    }
+    
+    public void setLastUpdateBy(String lastUpdateBy){
+<span class="fc" id="L113">        this.lastUpdateBy = lastUpdateBy;</span>
+<span class="fc" id="L114">    }</span>
+    
+    //&lt;/editor-fold&gt;
+    
+    // toString override for ComboBox
+    // Format: &quot;userName [userId]&quot;
+    @Override
+    public String toString(){
+<span class="fc" id="L122">        String displayName = userName + &quot; [&quot; + userId + &quot;]&quot;;</span>
+<span class="fc" id="L123">        return displayName;</span>
+    }
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

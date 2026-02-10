@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ViewCustomerScreenController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Java CRM Application</a> &gt; <a href="index.source.html" class="el_package">Controller</a> &gt; <span class="el_source">ViewCustomerScreenController.java</span></div><h1>ViewCustomerScreenController.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package Controller;
+
+import DAO.CustomerDaoImpl;
+import Model.Customer;
+import java.net.URL;
+import java.sql.SQLException;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
+
+/**
+ * Controls screen for viewing customers
+ *
+ * @author Austin Wong
+ */
+<span class="fc" id="L32">public class ViewCustomerScreenController extends GeneralController implements Initializable {</span>
+
+    //&lt;editor-fold defaultstate=&quot;collapsed&quot; desc=&quot;ui-variables&quot;&gt;
+    
+    @FXML
+    private TableColumn&lt;?, ?&gt; phoneCol;
+
+    @FXML
+    private TableColumn&lt;?, ?&gt; addressCol;
+
+    @FXML
+    private Button updateBtn;
+
+    @FXML
+    private TableColumn&lt;?, ?&gt; cityCol;
+
+    @FXML
+    private TableView&lt;Customer&gt; customerTableView;
+
+    @FXML
+    private TableColumn&lt;?, ?&gt; postalCodeCol;
+
+    @FXML
+    private Button scheduleApptBtn;
+    
+    @FXML
+    private Button addBtn;
+
+    @FXML
+    private Button deleteBtn;
+
+    @FXML
+    private TableColumn&lt;?, ?&gt; countryCol;
+
+    @FXML
+    private TableColumn&lt;?, ?&gt; idCol;
+
+    @FXML
+    private TableColumn&lt;?, ?&gt; nameCol;
+
+    @FXML
+    private Button backBtn;
+
+    @FXML
+    private TableColumn&lt;?, ?&gt; address2Col;
+    
+    //&lt;/editor-fold&gt;
+    
+<span class="fc" id="L80">    private final ObservableList&lt;Customer&gt; Customers = FXCollections.observableArrayList();</span>
+    private TableView.TableViewSelectionModel&lt;Customer&gt; tvSelCustomer;
+
+    // Query the DB to repopulate table
+    private void refreshTable(){
+<span class="nc" id="L85">        Customers.clear();</span>
+        try{
+<span class="nc" id="L87">            Customers.addAll(CustomerDaoImpl.getAllActiveCustomers());</span>
+        }
+<span class="nc" id="L89">        catch(SQLException e){</span>
+<span class="nc" id="L90">            Logger.getLogger(&quot;errorlog.txt&quot;).log(Level.WARNING,null,e);</span>
+<span class="nc" id="L91">            displayErrorAlert(&quot;Error retrieving customers from database&quot;);</span>
+<span class="nc" id="L92">        }</span>
+<span class="nc" id="L93">        customerTableView.setItems(Customers);</span>
+<span class="nc" id="L94">        tvSelCustomer = customerTableView.getSelectionModel();</span>
+<span class="nc" id="L95">    }</span>
+    
+    private void selectionError(){
+<span class="nc" id="L98">        displayErrorAlert(&quot;Select a customer first&quot;);</span>
+<span class="nc" id="L99">    }</span>
+    
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+        
+        //Set this as return screen
+<span class="nc" id="L105">        lastScreen = AppScreen.VIEWCUSTOMERSCREEN;</span>
+        
+        //Populate Table
+<span class="nc" id="L108">        idCol.setCellValueFactory(new PropertyValueFactory&lt;&gt;(&quot;customerId&quot;));</span>
+<span class="nc" id="L109">        nameCol.setCellValueFactory(new PropertyValueFactory&lt;&gt;(&quot;customerName&quot;));</span>
+<span class="nc" id="L110">        addressCol.setCellValueFactory(new PropertyValueFactory&lt;&gt;(&quot;address&quot;));</span>
+<span class="nc" id="L111">        address2Col.setCellValueFactory(new PropertyValueFactory&lt;&gt;(&quot;address2&quot;));</span>
+<span class="nc" id="L112">        postalCodeCol.setCellValueFactory(new PropertyValueFactory&lt;&gt;(&quot;postalCode&quot;));</span>
+<span class="nc" id="L113">        cityCol.setCellValueFactory(new PropertyValueFactory&lt;&gt;(&quot;city&quot;));</span>
+<span class="nc" id="L114">        countryCol.setCellValueFactory(new PropertyValueFactory&lt;&gt;(&quot;country&quot;));</span>
+<span class="nc" id="L115">        phoneCol.setCellValueFactory(new PropertyValueFactory&lt;&gt;(&quot;phone&quot;));</span>
+<span class="nc" id="L116">        refreshTable();</span>
+<span class="nc" id="L117">    }</span>
+    
+    //&lt;editor-fold defaultstate=&quot;collapsed&quot; desc=&quot;actions&quot;&gt;
+    
+    // Schedule appointment for selected customer
+    @FXML
+    void onActionScheduleAppt(ActionEvent event) {
+<span class="nc bnc" id="L124" title="All 2 branches missed.">        if(tvSelCustomer.isEmpty())</span>
+<span class="nc" id="L125">            selectionError();</span>
+        else{
+<span class="nc" id="L127">            Customer.setCurrentCustomer(tvSelCustomer.getSelectedItem());</span>
+<span class="nc" id="L128">            displayScreen(event, &quot;/View/AddAppointmentScreen.fxml&quot;);</span>
+        }
+<span class="nc" id="L130">    }</span>
+    
+    // Add a new customer
+    @FXML
+    void onActionAddCustomer(ActionEvent event) {
+<span class="nc" id="L135">        displayScreen(event, &quot;/View/AddCustomerScreen.fxml&quot;);</span>
+<span class="nc" id="L136">    }</span>
+
+    // Update an existing customer
+    @FXML
+    void onActionUpdateCustomer(ActionEvent event) {
+<span class="nc bnc" id="L141" title="All 2 branches missed.">        if(tvSelCustomer.isEmpty()){</span>
+<span class="nc" id="L142">            selectionError();</span>
+        }
+        else{
+<span class="nc" id="L145">            Customer.setCurrentCustomer(tvSelCustomer.getSelectedItem());</span>
+<span class="nc" id="L146">            displayScreen(event, &quot;/View/UpdateCustomerScreen.fxml&quot;);</span>
+        }
+<span class="nc" id="L148">    }</span>
+
+    // Delete selected customer
+    @FXML
+    void onActionDeleteCustomer(ActionEvent event) {
+<span class="nc bnc" id="L153" title="All 2 branches missed.">        if(tvSelCustomer.isEmpty()){</span>
+<span class="nc" id="L154">            selectionError();</span>
+        }
+        else{
+<span class="nc" id="L157">            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, &quot;Deleting customer will delete all appointments with customer. Continue?&quot;, ButtonType.YES, ButtonType.NO);</span>
+<span class="nc" id="L158">            alert.showAndWait()</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">                .filter(res -&gt; res == ButtonType.YES) // Using lambda to create specific event handling if user clicks YES. Not going to reuse this elsewhere.</span>
+<span class="nc" id="L160">                .ifPresent(res -&gt; {</span>
+                    try {
+<span class="nc" id="L162">                        CustomerDaoImpl.deleteCustomer(tvSelCustomer.getSelectedItem().getCustomerId());</span>
+<span class="nc" id="L163">                        Customer.setCurrentCustomer(null);</span>
+<span class="nc" id="L164">                        displayNotification(event, &quot;Customer deleted&quot;);</span>
+<span class="nc" id="L165">                        refreshTable();</span>
+                    }
+<span class="nc" id="L167">                    catch (SQLException e) {</span>
+<span class="nc" id="L168">                        Logger.getLogger(&quot;errorlog.txt&quot;).log(Level.WARNING, null, e);</span>
+<span class="nc" id="L169">                        displayErrorAlert(&quot;Error deleting customer from database&quot;);</span>
+<span class="nc" id="L170">                    }</span>
+<span class="nc" id="L171">                });</span>
+        }
+<span class="nc" id="L173">    }</span>
+
+    // Return to previous screen
+    @FXML
+    void onActionReturn(ActionEvent event) {
+<span class="nc" id="L178">        displayScreen(event, &quot;/View/MainMenu.fxml&quot;);</span>
+<span class="nc" id="L179">    }</span>
+    
+    //&lt;/editor-fold&gt;
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Report.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Java CRM Application</a> &gt; <a href="index.source.html" class="el_package">Model</a> &gt; <span class="el_source">Report.java</span></div><h1>Report.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package Model;
+
+/**
+ *
+ * @author Austin Wong
+ */
+public class Report {
+    
+    // Variables
+    private String reportName;
+    private int reportId;
+    
+    // Constructor
+<span class="fc" id="L19">    public Report(String reportName, int reportId){</span>
+<span class="fc" id="L20">        this.reportName = reportName;</span>
+<span class="fc" id="L21">        this.reportId = reportId;</span>
+<span class="fc" id="L22">    }</span>
+    
+    //&lt;editor-fold defaultstate=&quot;collapsed&quot; desc=&quot;setters and getters&quot;&gt;
+    public String getReportName(){
+<span class="fc" id="L26">        return reportName;</span>
+    }
+    
+    public int getReportId(){
+<span class="fc" id="L30">        return reportId;</span>
+    }
+    
+    public void setReportName(String reportName){
+<span class="fc" id="L34">        this.reportName = reportName;</span>
+<span class="fc" id="L35">    }</span>
+    
+    public void setReportId(int reportId){
+<span class="fc" id="L38">        this.reportId = reportId;</span>
+<span class="fc" id="L39">    }</span>
+    
+    //&lt;/editor-fold&gt;
+    
+    // Override for ComboBox display
+    @Override
+    public String toString(){
+<span class="fc" id="L46">        String displayName = reportName + &quot; [&quot; + reportId + &quot;]&quot;;</span>
+<span class="fc" id="L47">        return reportName;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

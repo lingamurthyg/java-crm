@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GeneralController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Java CRM Application</a> &gt; <a href="index.source.html" class="el_package">Controller</a> &gt; <span class="el_source">GeneralController.java</span></div><h1>GeneralController.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package Controller;
+
+import Utilities.RBMain;
+import Utilities.WindowSizing;
+import static Utilities.WindowSizing.setAlertCoordinates;
+import java.io.IOException;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
+import javafx.event.Event;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Control;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.paint.Color;
+import javafx.stage.Stage;
+import javafx.stage.Window;
+import javafx.util.Duration;
+
+/**
+ * Commonly shared controller variables and methods
+ * @author Austin Wong
+ */
+<span class="fc" id="L35">public class GeneralController {</span>
+    
+    //&lt;editor-fold desc=&quot;variables&quot;&gt;
+    private Stage stage;
+    private Parent root;
+    private Scene scene;
+    
+    protected String errorStr;
+    
+    protected static ResourceBundle rb;
+    
+<span class="nc" id="L46">    protected static enum AppScreen{VIEWCUSTOMERSCREEN, CALENDARSCREEN};</span>
+    protected static AppScreen lastScreen;
+    //&lt;/editor-fold&gt;
+    
+    //&lt;editor-fold defaultstate=&quot;collapsed&quot; desc=&quot;screen navigation methods&quot;&gt;
+    
+    // Primary method used to switch screens
+    protected void displayScreen(Event event, String resourcePath) {
+<span class="nc" id="L54">        stage = (Stage) ((Control) event.getSource()).getScene().getWindow();</span>
+        try{
+<span class="nc" id="L56">            root = FXMLLoader.load(getClass().getResource(resourcePath), RBMain.getRb());</span>
+<span class="nc" id="L57">            scene = new Scene(root, WindowSizing.getWidth(stage), WindowSizing.getHeight(stage));</span>
+<span class="nc" id="L58">            scene.getStylesheets().add(&quot;Resources/generalStylesheet.css&quot;);</span>
+<span class="nc" id="L59">            root.requestFocus();</span>
+<span class="nc" id="L60">            stage.setScene(scene);</span>
+<span class="nc" id="L61">            stage.show();</span>
+        }
+        // This shouldn't happen, so we log it and close the application
+<span class="nc" id="L64">        catch(IOException e){</span>
+<span class="nc" id="L65">            Logger.getLogger(&quot;errorlog.txt&quot;).log(Level.SEVERE, null, e);</span>
+<span class="nc" id="L66">            throw new RuntimeException(e);</span>
+<span class="nc" id="L67">        }</span>
+<span class="nc" id="L68">    }</span>
+    
+    // Returns to previous screen
+    // Usually called by a &quot;back&quot; button
+    protected void returnToLastScreen(Event event) {
+<span class="nc bnc" id="L73" title="All 2 branches missed.">        if(lastScreen.equals(AppScreen.CALENDARSCREEN))</span>
+<span class="nc" id="L74">            displayScreen(event,&quot;/View/CalendarScreen.fxml&quot;);</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        else if(lastScreen.equals(AppScreen.VIEWCUSTOMERSCREEN))</span>
+<span class="nc" id="L76">            displayScreen(event,&quot;/View/ViewCustomerScreen.fxml&quot;);</span>
+<span class="nc" id="L77">    }</span>
+    
+    //&lt;/editor-fold&gt;
+    
+    //&lt;editor-fold defaultstate=&quot;collapsed&quot; desc=&quot;user communication methods&quot;&gt;
+    
+    // Sets a label's text to a temporary message in darkred font that fades out
+    // Generally used for checking user input
+    protected void displayMessage(Label lbl, String message) {
+<span class="nc" id="L86">        lbl.setText(message);</span>
+<span class="nc" id="L87">        lbl.setTextFill(Color.DARKRED);</span>
+<span class="nc" id="L88">        FadeTransition ft = new FadeTransition(Duration.millis(4000), lbl);</span>
+<span class="nc" id="L89">        ft.setFromValue(1.0);</span>
+<span class="nc" id="L90">        ft.setToValue(0.0);</span>
+<span class="nc" id="L91">        ft.play();</span>
+<span class="nc" id="L92">    }</span>
+    
+    // Displays an Error Alert and waits for user to acknowledge it
+    // Generally used for serious alerts
+    protected void displayErrorAlert(String errorString){
+<span class="nc" id="L97">        Alert alert = new Alert(Alert.AlertType.ERROR, errorString, ButtonType.OK);</span>
+<span class="nc" id="L98">        alert.showAndWait();</span>
+<span class="nc" id="L99">    }</span>
+    
+    // Displays a temporary notification in lower-right corner of window
+    // Generally used for success messages
+    protected void displayNotification(Event event, String content){
+        
+<span class="nc" id="L105">        Stage stage = (Stage)((Control) event.getSource()).getScene().getWindow();</span>
+        
+        // Create Alert
+<span class="nc" id="L108">        Alert alert = new Alert(Alert.AlertType.NONE);</span>
+<span class="nc" id="L109">        alert.setResult(ButtonType.OK); // Sets result since no buttons are present</span>
+<span class="nc" id="L110">        alert.setContentText(content);</span>
+<span class="nc" id="L111">        alert.setOnShown(e -&gt; setAlertCoordinates(stage, alert)); // .setOnShown takes an EventHandler, but since this is a short and simple call to a procedure in another class, it makes sense to use a lambda here</span>
+                
+        // Auto-close
+<span class="nc" id="L114">        PauseTransition delay = new PauseTransition(Duration.seconds(3));</span>
+<span class="nc" id="L115">        delay.setOnFinished(e -&gt; alert.close()); // Again, short and simple so it was easier to use a lambda than write out a new eventhandler</span>
+        
+        // Show alert
+<span class="nc" id="L118">        alert.show();</span>
+<span class="nc" id="L119">        delay.play();</span>
+        
+        // Close alert if X button is clicked
+<span class="nc" id="L122">        Window window = alert.getDialogPane().getScene().getWindow();</span>
+<span class="nc" id="L123">        window.setOnCloseRequest(e -&gt; alert.close());</span>
+<span class="nc" id="L124">    }</span>
+    
+    //&lt;/editor-fold&gt;
+    
+    // Check for empty fields, set errorStr if a field is empty
+    // Returns True if an empty field exists, False if all fields are populated or no fields were passed in as a parameter
+    protected Boolean checkFields(TextField...txtFields){
+        
+<span class="fc" id="L132">        rb = RBMain.getRb();</span>
+<span class="pc bfc" id="L133" title="All 2 branches covered.">        for(TextField txt : txtFields){</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">            if(txt.getText().isEmpty()){</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">                if(txt.getPromptText().isEmpty())</span>
+<span class="nc" id="L136">                    errorStr = rb.getString(&quot;unknownemptyfield&quot;);</span>
+                else
+<span class="nc" id="L138">                    errorStr = txt.getPromptText() + &quot; &quot; + rb.getString(&quot;knownemptyfield&quot;);</span>
+<span class="nc" id="L139">                return true;</span>
+            }
+        }
+<span class="fc" id="L142">        return false;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

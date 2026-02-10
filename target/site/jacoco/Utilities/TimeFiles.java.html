@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TimeFiles.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Java CRM Application</a> &gt; <a href="index.source.html" class="el_package">Utilities</a> &gt; <span class="el_source">TimeFiles.java</span></div><h1>TimeFiles.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package Utilities;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.TimeZone;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
+/**
+ * Commonly used functions for creating, adjusting, and formatting LocalDateTimes for both application and database use
+ * @author Austin Wong
+ */
+<span class="nc" id="L22">public class TimeFiles {</span>
+    
+<span class="fc" id="L24">    private static final DateTimeFormatter DBDATETIMEFORMAT = DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd HH:mm:ss.S&quot;);</span>
+<span class="fc" id="L25">    private static final DateTimeFormatter UITIMEFORMAT = DateTimeFormatter.ofPattern(&quot;h:mm a&quot;);</span>
+<span class="fc" id="L26">    private static final DateTimeFormatter UIDATEFORMAT = DateTimeFormatter.ofPattern(&quot;M/d/yyyy&quot;);</span>
+    
+    // Takes a LocalDate and a String representing time in &quot;h:mm a&quot; format
+    // Returns a LocalDateTime
+    public static LocalDateTime createLocalDateTime(LocalDate date, String time12){
+<span class="fc" id="L31">        LocalDateTime ldt = LocalDateTime.of(date, LocalTime.parse(time12, UITIMEFORMAT));</span>
+<span class="fc" id="L32">        return ldt;</span>
+    }
+    
+    // Takes a LocalDateTime
+    // Returns a DB-ready String representing timestamp in UTC
+    public static String localDateTimeToDBStr(LocalDateTime ldtUser){
+<span class="fc" id="L38">        ZonedDateTime zdtUser = ZonedDateTime.of(ldtUser, TimeZone.getDefault().toZoneId());</span>
+<span class="fc" id="L39">        ZonedDateTime zdtUtc = zdtUser.withZoneSameInstant(ZoneId.of(&quot;UTC&quot;));</span>
+<span class="fc" id="L40">        String dbStr = zdtUtc.format(DBDATETIMEFORMAT);</span>
+<span class="fc" id="L41">        return dbStr;</span>
+    }
+    
+    // Takes a String representing DB timestamp in UTC
+    // Returns a LocalDateTime in User's timezone, automatically taking into account Daylight vs Standard time
+    public static LocalDateTime dbStrToLocalDateTime(String dbStr){
+<span class="nc" id="L47">        LocalDateTime ldtUtc = LocalDateTime.parse(dbStr, DBDATETIMEFORMAT);</span>
+<span class="nc" id="L48">        ZonedDateTime zdtUtc = ZonedDateTime.of(ldtUtc, ZoneId.of(&quot;UTC&quot;));</span>
+<span class="nc" id="L49">        ZonedDateTime zdtUser = zdtUtc.withZoneSameInstant(TimeZone.getDefault().toZoneId());</span>
+<span class="nc" id="L50">        LocalDateTime ldtUser = zdtUser.toLocalDateTime();</span>
+<span class="nc" id="L51">        return ldtUser;</span>
+    }
+    
+    // Takes a LocalDateTime
+    // Returns a String representing time in &quot;h:mm a&quot; format
+    public static String localDateTimeToUITime(LocalDateTime ldt){
+<span class="fc" id="L57">        String uiTime = ldt.format(UITIMEFORMAT);</span>
+<span class="fc" id="L58">        return uiTime;</span>
+    }
+    
+    // Takes a LocalDateTime
+    // Returns a String representing date in &quot;M/d/yyyy&quot; format
+    public static String localDateTimeToUIDate(LocalDateTime ldt){
+<span class="fc" id="L64">        String uiDate = ldt.format(UIDATEFORMAT);</span>
+<span class="fc" id="L65">        return uiDate;</span>
+    }
+    
+    // Returns a list of appointment times from 8:00am - 5:00pm in half-hour increments
+    public static ObservableList&lt;String&gt; getAvailableAppointmentTimes(){
+<span class="fc" id="L70">        ObservableList&lt;String&gt; ltList = FXCollections.observableArrayList();</span>
+<span class="fc" id="L71">        LocalTime startTime = LocalTime.of(8, 0);</span>
+<span class="fc" id="L72">        LocalTime endTime = LocalTime.of(17, 1); // .isBefore on next line is exclusive (&lt; not &lt;=) so we add a minute to include 17:00</span>
+        
+<span class="fc bfc" id="L74" title="All 2 branches covered.">        for(LocalTime lt = startTime; lt.isBefore(endTime); lt = lt.plusMinutes(30)){</span>
+<span class="fc" id="L75">            ltList.add(lt.format(UITIMEFORMAT));</span>
+        }
+<span class="fc" id="L77">        return ltList;</span>
+    }
+    
+    // Returns a string representing current date and time in UTC in DB format
+    public static String dbStrNow(){
+<span class="fc" id="L82">        return localDateTimeToDBStr(LocalDateTime.now());</span>
+    }
+    
+    // Takes a LocalDateTime representing start date of search period
+    // Returns a list of Strings representing start and end LocalDateTimes with either a rolling year or a calendar year
+    // 
+    // Rolling year: FROM 1 year before start TO start
+    // Calendar year: FROM 1st day of start year TO last day of start year
+    //
+    // Note: rolling year calculates up to today, not through the end of the month
+    public static ObservableList&lt;String&gt; getSearchTimes(LocalDateTime start, Boolean rolling){
+        
+<span class="fc" id="L94">        ObservableList&lt;String&gt; searchTimes = FXCollections.observableArrayList();</span>
+        String startSearch;
+        String endSearch;
+
+        // Rolling Year
+<span class="fc bfc" id="L99" title="All 2 branches covered.">        if(rolling == true){</span>
+<span class="fc" id="L100">            startSearch = localDateTimeToDBStr(start.minusYears(1));</span>
+<span class="fc" id="L101">            endSearch = localDateTimeToDBStr(start);</span>
+        }
+        // Calendar Year
+        else{
+<span class="fc" id="L105">            LocalDate ld = start.toLocalDate();</span>
+<span class="fc" id="L106">            LocalDateTime ldtFirstOfYear = LocalDateTime.of(ld.withDayOfYear(1), LocalTime.MIN);</span>
+<span class="fc" id="L107">            LocalDateTime ldtLastOfYear = LocalDateTime.of(ld.withDayOfYear(ld.lengthOfYear()), LocalTime.MAX);</span>
+<span class="fc" id="L108">            startSearch = localDateTimeToDBStr(ldtFirstOfYear);</span>
+<span class="fc" id="L109">            endSearch = localDateTimeToDBStr(ldtLastOfYear);</span>
+        }  
+        
+<span class="fc" id="L112">        searchTimes.addAll(startSearch, endSearch);</span>
+        
+<span class="fc" id="L114">        return searchTimes;</span>
+    }
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

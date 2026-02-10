@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GeneralDaoImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Java CRM Application</a> &gt; <a href="index.source.html" class="el_package">DAO</a> &gt; <span class="el_source">GeneralDaoImpl.java</span></div><h1>GeneralDaoImpl.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package DAO;
+
+import static Utilities.TimeFiles.dbStrToLocalDateTime;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+
+/**
+ * Common variables and methods for DAO classes
+ * @author Austin Wong
+ */
+<span class="fc" id="L17">public class GeneralDaoImpl {</span>
+    
+    protected static String createDate;
+    protected static String createdBy;
+    protected static String lastUpdate;
+    protected static String lastUpdateBy;
+    protected static LocalDateTime createDateLdt;
+    protected static LocalDateTime lastUpdateLdt;
+    
+    protected static void getMetadata(ResultSet rs) throws SQLException {
+<span class="nc" id="L27">        createDate = rs.getString(&quot;createDate&quot;);</span>
+<span class="nc" id="L28">        createdBy = rs.getString(&quot;createdBy&quot;);</span>
+<span class="nc" id="L29">        lastUpdate = rs.getString(&quot;lastUpdate&quot;);</span>
+<span class="nc" id="L30">        lastUpdateBy = rs.getString(&quot;lastUpdateBy&quot;);</span>
+<span class="nc" id="L31">        createDateLdt = dbStrToLocalDateTime(createDate);</span>
+<span class="nc" id="L32">        lastUpdateLdt = dbStrToLocalDateTime(lastUpdate);</span>
+<span class="nc" id="L33">    }    </span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

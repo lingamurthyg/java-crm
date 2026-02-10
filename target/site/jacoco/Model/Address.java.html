@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Address.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Java CRM Application</a> &gt; <a href="index.source.html" class="el_package">Model</a> &gt; <span class="el_source">Address.java</span></div><h1>Address.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package Model;
+
+import DAO.CityDaoImpl;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+
+/**
+ *
+ * @author Austin Wong
+ */
+public class Address {
+    
+    //&lt;editor-fold defaultstate=&quot;collapsed&quot; desc=&quot;db variables&quot;&gt;
+    
+    private int addressId;
+    private String addressName;
+    private String address2Name;
+    private int cityId;
+    private String postalCode;
+    private String phone;
+    private LocalDateTime createDate;
+    private String createdBy;
+    private LocalDateTime lastUpdate;
+    private String lastUpdateBy;
+    
+    //&lt;/editor-fold&gt;
+    
+    private City cityObj; // City Object related to Address Object via cityId
+    
+<span class="fc" id="L35">    public Address(int addressId, String addressName, String address2Name, int cityId, String postalCode, String phone, LocalDateTime createDate, String createdBy, LocalDateTime lastUpdate, String lastUpdateBy){</span>
+<span class="fc" id="L36">        this.addressId = addressId;</span>
+<span class="fc" id="L37">        this.addressName = addressName;</span>
+<span class="fc" id="L38">        this.address2Name = address2Name;</span>
+<span class="fc" id="L39">        this.cityId = cityId;</span>
+<span class="fc" id="L40">        this.postalCode = postalCode;</span>
+<span class="fc" id="L41">        this.phone = phone;</span>
+<span class="fc" id="L42">        this.createDate = createDate;</span>
+<span class="fc" id="L43">        this.createdBy = createdBy;</span>
+<span class="fc" id="L44">        this.lastUpdate = lastUpdate;</span>
+<span class="fc" id="L45">        this.lastUpdateBy = lastUpdateBy;</span>
+<span class="fc" id="L46">    }</span>
+    
+    //&lt;editor-fold defaultstate=&quot;collapsed&quot; desc=&quot;db variable setters and getters&quot;&gt;
+    
+    public int getAddressId(){
+<span class="fc" id="L51">        return addressId;</span>
+    }
+    
+    public void setAddressId(int addressId){
+<span class="fc" id="L55">        this.addressId = addressId;</span>
+<span class="fc" id="L56">    }</span>
+    
+    public String getAddressName(){
+<span class="fc" id="L59">        return addressName;</span>
+    }
+    
+    public void setAddressName(String addressName){
+<span class="fc" id="L63">        this.addressName = addressName;</span>
+<span class="fc" id="L64">    }</span>
+    
+    public String getAddress2Name(){
+<span class="fc" id="L67">        return address2Name;</span>
+    }
+    
+    public void setAddress2Name(String address2Name){
+<span class="fc" id="L71">        this.address2Name = address2Name;</span>
+<span class="fc" id="L72">    }</span>
+    
+    public int getCityId(){
+<span class="fc" id="L75">        return cityId;</span>
+    }
+    
+    public void setCityId(int cityId){
+<span class="fc" id="L79">        this.cityId = cityId;</span>
+<span class="fc" id="L80">    }</span>
+    
+    public String getPostalCode(){
+<span class="fc" id="L83">        return postalCode;</span>
+    }
+    
+    public void setPostalCode(String postalCode){
+<span class="fc" id="L87">        this.postalCode = postalCode;</span>
+<span class="fc" id="L88">    }</span>
+    
+    public String getPhone(){
+<span class="fc" id="L91">        return phone;</span>
+    }
+    
+    public void setPhone(String phone){
+<span class="fc" id="L95">        this.phone = phone;</span>
+<span class="fc" id="L96">    }</span>
+    
+    public LocalDateTime getCreateDate(){
+<span class="fc" id="L99">        return createDate;</span>
+    }
+    
+    public void setCreateDate(LocalDateTime createDate){
+<span class="fc" id="L103">        this.createDate = createDate;</span>
+<span class="fc" id="L104">    }</span>
+    
+    public String getCreatedBy(){
+<span class="fc" id="L107">        return createdBy;</span>
+    }
+    
+    public void setCreatedBy(String createdBy){
+<span class="fc" id="L111">        this.createdBy = createdBy;</span>
+<span class="fc" id="L112">    }</span>
+    
+    public LocalDateTime getLastUpdate(){
+<span class="fc" id="L115">        return lastUpdate;</span>
+    }
+    
+    public void setLastUpdate(LocalDateTime lastUpdate){
+<span class="fc" id="L119">        this.lastUpdate = lastUpdate;</span>
+<span class="fc" id="L120">    }</span>
+    
+    public String getLastUpdateBy(){
+<span class="fc" id="L123">        return lastUpdateBy;</span>
+    }
+    
+    public void setLastUpdateBy(String lastUpdateBy){
+<span class="fc" id="L127">        this.lastUpdateBy = lastUpdateBy;</span>
+<span class="fc" id="L128">    }</span>
+    
+    // &lt;/editor-fold&gt;
+    
+    public City getCityObj(){
+<span class="fc" id="L133">        return this.cityObj;</span>
+    }
+    
+    public void setCityObj() throws SQLException {
+<span class="nc" id="L137">        this.cityObj = CityDaoImpl.getCity(cityId);</span>
+<span class="nc" id="L138">    }</span>
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

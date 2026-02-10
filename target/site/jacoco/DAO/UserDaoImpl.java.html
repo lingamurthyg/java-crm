@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserDaoImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Java CRM Application</a> &gt; <a href="index.source.html" class="el_package">DAO</a> &gt; <span class="el_source">UserDaoImpl.java</span></div><h1>UserDaoImpl.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package DAO;
+
+import static DAO.DBQuery.setPreparedStatement;
+import Model.User;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
+/**
+ *
+ * @author Austin Wong
+ */
+<span class="fc" id="L20">public class UserDaoImpl extends GeneralDaoImpl {</span>
+
+    //Compare username and password to those in DB
+    public static Boolean logIn(String userName, String password) throws SQLException {
+        
+<span class="nc" id="L25">        String sqlStatement = &quot;select * FROM user WHERE userName = ? AND password = ? AND active=TRUE&quot;;</span>
+<span class="nc" id="L26">        PreparedStatement ps = setPreparedStatement(sqlStatement);</span>
+
+<span class="nc" id="L28">        ps.setString(1, userName);</span>
+<span class="nc" id="L29">        ps.setString(2, password);</span>
+<span class="nc" id="L30">        ps.execute();</span>
+<span class="nc" id="L31">        ResultSet rs = ps.getResultSet();</span>
+
+<span class="nc bnc" id="L33" title="All 2 branches missed.">        if (rs.next()){</span>
+            //Set currentUser
+<span class="nc" id="L35">            rs.getMetaData();</span>
+<span class="nc" id="L36">            User.setCurrentUser(new User(rs.getInt(&quot;userId&quot;),userName,&quot;&quot;,true,createDateLdt,createdBy,lastUpdateLdt,lastUpdateBy)); // No need to hang onto password</span>
+<span class="nc" id="L37">            return true;</span>
+        }
+        else
+<span class="nc" id="L40">            return false;</span>
+    }
+    
+    // Returns a list of all active users
+    public static ObservableList&lt;User&gt; getAllActiveUsers() throws SQLException {
+        
+<span class="nc" id="L46">        ObservableList&lt;User&gt; allUsers = FXCollections.observableArrayList();</span>
+        
+<span class="nc" id="L48">        String sqlStatement = &quot;SELECT * FROM user WHERE active = true ORDER BY userName&quot;;</span>
+<span class="nc" id="L49">        PreparedStatement ps = setPreparedStatement(sqlStatement);</span>
+
+<span class="nc" id="L51">        ps.execute();</span>
+<span class="nc" id="L52">        ResultSet rs = ps.getResultSet();</span>
+
+<span class="nc bnc" id="L54" title="All 2 branches missed.">        while(rs.next()){</span>
+<span class="nc" id="L55">            int userId = rs.getInt(&quot;userId&quot;);</span>
+<span class="nc" id="L56">            String userName = rs.getString(&quot;userName&quot;);</span>
+<span class="nc" id="L57">            String password = &quot;&quot;; // Leave password blank - no need for it</span>
+<span class="nc" id="L58">            Boolean active = rs.getBoolean(&quot;active&quot;);</span>
+<span class="nc" id="L59">            rs.getMetaData();</span>
+<span class="nc" id="L60">            User user = new User(userId,userName,password,active,createDateLdt,createdBy,lastUpdateLdt,lastUpdateBy);</span>
+            
+<span class="nc" id="L62">            allUsers.add(user);</span>
+<span class="nc" id="L63">        }</span>
+        
+<span class="nc" id="L65">        return allUsers;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

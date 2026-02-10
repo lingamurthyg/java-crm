@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CalendarScreenController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Java CRM Application</a> &gt; <a href="index.source.html" class="el_package">Controller</a> &gt; <span class="el_source">CalendarScreenController.java</span></div><h1>CalendarScreenController.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package Controller;
+
+import DAO.AppointmentDaoImpl;
+import Model.Appointment;
+import Model.User;
+import java.net.URL;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
+import java.time.temporal.TemporalField;
+import java.time.temporal.WeekFields;
+import java.util.Locale;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
+import static DAO.UserDaoImpl.getAllActiveUsers;
+
+/**
+ * Controls calendar logic
+ *
+ * @author Austin Wong
+ */
+<span class="fc" id="L44">public class CalendarScreenController extends GeneralController implements Initializable {</span>
+
+    //&lt;editor-fold defaultstate=&quot;collapsed&quot; desc=&quot;ui-variables&quot;&gt;
+    
+    @FXML
+    private TableColumn&lt;?, ?&gt; typeCol;
+
+    @FXML
+    private TableColumn&lt;?, ?&gt; titleCol;
+
+    @FXML
+    private TableColumn&lt;?, ?&gt; startCol;
+
+    @FXML
+    private TableColumn&lt;?, ?&gt; customerCol;
+
+    @FXML
+    private Button updateBtn;
+
+    @FXML
+    private DatePicker datePicker;
+
+    @FXML
+    private ImageView leftArrow;
+
+    @FXML
+    private Button addBtn;
+
+    @FXML
+    private ComboBox&lt;Period&gt; periodComboBox;
+    
+    @FXML
+    private ComboBox&lt;User&gt; userComboBox;
+
+    @FXML
+    private ImageView rightArrow;
+
+    @FXML
+    private Button deleteBtn;
+
+    @FXML
+    private TableColumn&lt;?, ?&gt; endCol;
+
+    @FXML
+    private TableColumn&lt;?, ?&gt; dateCol;
+
+    @FXML
+    private Button backBtn;
+
+    @FXML
+    private TableView&lt;Appointment&gt; appointmentTableView;
+    
+    //&lt;/editor-fold&gt;
+    
+    // ENUM for time period to display appointments on calendar
+<span class="fc" id="L99">    private static Period lastSelectedPeriod = Period.WEEK; // Default to WEEK</span>
+<span class="fc" id="L100">    private enum Period {</span>
+        
+<span class="fc" id="L102">        WEEK(&quot;WEEK&quot;),</span>
+<span class="fc" id="L103">        MONTH(&quot;MONTH&quot;),</span>
+<span class="fc" id="L104">        ALL_APPOINTMENTS(&quot;ALL APPOINTMENTS&quot;);</span>
+        
+        private final String displayName;
+        
+<span class="fc" id="L108">        Period(String displayName){</span>
+<span class="fc" id="L109">            this.displayName = displayName;</span>
+<span class="fc" id="L110">        }</span>
+        
+        @Override
+        public String toString(){
+<span class="nc" id="L114">            return displayName;</span>
+        }
+    };
+    
+<span class="fc" id="L118">    private static LocalDate lastSelectedDate = LocalDate.now();</span>
+    
+<span class="fc" id="L120">    private final ObservableList&lt;Appointment&gt; appointments = FXCollections.observableArrayList();</span>
+    private TableView.TableViewSelectionModel&lt;Appointment&gt; tvSelAppointment;
+    
+<span class="fc" id="L123">    private ObservableList&lt;User&gt; userList = FXCollections.observableArrayList();</span>
+
+    //&lt;editor-fold defaultstate=&quot;collapsed&quot; desc=&quot;actions&quot;&gt;
+    
+    @FXML
+    void onActionAddAppointment(ActionEvent event) {
+<span class="nc" id="L129">        displayScreen(event, &quot;/View/AddAppointmentScreen.fxml&quot;);</span>
+<span class="nc" id="L130">    }</span>
+
+    @FXML
+    void onActionUpdateAppointment(ActionEvent event) {
+<span class="nc bnc" id="L134" title="All 2 branches missed.">        if(currentUserSelected()) {</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">            if(tvSelAppointment.isEmpty()){</span>
+<span class="nc" id="L136">                displayErrorAlert(&quot;Select an appointment first&quot;);</span>
+            }
+            else{
+<span class="nc" id="L139">                Appointment.setCurrentAppointment(tvSelAppointment.getSelectedItem());</span>
+<span class="nc" id="L140">                displayScreen(event, &quot;/View/UpdateAppointmentScreen.fxml&quot;);</span>
+            }
+        } else
+<span class="nc" id="L143">            displayErrorAlert(&quot;Cannot update other user's appointments&quot;);</span>
+<span class="nc" id="L144">    }</span>
+
+    @FXML
+    void onActionDeleteAppointment(ActionEvent event) {
+<span class="nc bnc" id="L148" title="All 2 branches missed.">        if(currentUserSelected()){</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">            if(tvSelAppointment.isEmpty()){</span>
+<span class="nc" id="L150">                displayErrorAlert(&quot;Select an appointment first&quot;);</span>
+            }
+            else{
+<span class="nc" id="L153">                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, &quot;Delete appointment?&quot;, ButtonType.YES, ButtonType.NO);</span>
+<span class="nc" id="L154">                alert.showAndWait()</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">                        .filter(res -&gt; res == ButtonType.YES) // Using lambda to handle unique event where user clicks yes on alert to agree to delete appointment</span>
+<span class="nc" id="L156">                        .ifPresent(res -&gt; {</span>
+                            try {
+<span class="nc bnc" id="L158" title="All 2 branches missed.">                                if(AppointmentDaoImpl.deleteAppointment(tvSelAppointment.getSelectedItem().getAppointmentId())&gt;0){</span>
+<span class="nc" id="L159">                                    refreshTable();</span>
+<span class="nc" id="L160">                                    displayNotification(event, &quot;Appointment successfully deleted&quot;);</span>
+<span class="nc" id="L161">                                    Appointment.setCurrentAppointment(null);</span>
+                                }
+                            }
+<span class="nc" id="L164">                            catch (SQLException e) {</span>
+<span class="nc" id="L165">                                Logger.getLogger(&quot;errorlog.txt&quot;).log(Level.WARNING, null, e);</span>
+<span class="nc" id="L166">                                displayErrorAlert(&quot;Error occurred while deleting appointment from database&quot;);</span>
+<span class="nc" id="L167">                            }});</span>
+<span class="nc" id="L168">            }</span>
+        }
+        else{
+<span class="nc" id="L171">            displayErrorAlert(&quot;Cannot delete other user's appointments&quot;);</span>
+        }
+<span class="nc" id="L173">    }</span>
+
+    // Return to main menu
+    @FXML
+    void onActionReturn(ActionEvent event) { 
+<span class="nc" id="L178">        displayScreen(event, &quot;/View/MainMenu.fxml&quot;);</span>
+<span class="nc" id="L179">    }</span>
+    
+    // Filter table based on date and time period selected
+    @FXML
+    void onActionFilterPeriod(ActionEvent event) {
+<span class="nc" id="L184">        lastSelectedPeriod = periodComboBox.getValue();</span>
+<span class="nc" id="L185">        lastSelectedDate = datePicker.getValue();</span>
+<span class="nc" id="L186">        refreshTable();</span>
+<span class="nc" id="L187">    }</span>
+    
+    // Filter/refresh table when selected user is changed
+    @FXML
+    void onActionFilterUser(ActionEvent event) {
+<span class="nc" id="L192">        refreshTable();</span>
+<span class="nc" id="L193">    }</span>
+    
+    //&lt;/editor-fold&gt;
+    
+    // Returns userId of user selected in ComboBox
+    private int getSelectedUserId(){
+<span class="nc" id="L199">        User user = userComboBox.getValue();</span>
+<span class="nc" id="L200">        int userId = user.getUserId();</span>
+<span class="nc" id="L201">        return userId;</span>
+    }
+    
+    // Returns true if Current User is selected, false otherwise
+    private boolean currentUserSelected(){
+<span class="nc" id="L206">        int currentUserId = User.getCurrentUser().getUserId();</span>
+<span class="nc" id="L207">        int selectedUserId = getSelectedUserId();</span>
+<span class="nc bnc" id="L208" title="All 2 branches missed.">        return selectedUserId == currentUserId;</span>
+    }
+    
+    // Refreshes Data in Calendar
+    private void refreshTable(){
+        
+        // Get userId for selected user
+<span class="nc" id="L215">        int userId = getSelectedUserId();</span>
+        
+        // Prepare Search Periods depending on which was selected
+<span class="nc" id="L218">        Period period = periodComboBox.getValue();</span>
+<span class="nc" id="L219">        LocalDate ld = datePicker.getValue();</span>
+<span class="nc" id="L220">        LocalDateTime searchStart = ld.atStartOfDay();</span>
+<span class="nc" id="L221">        LocalDateTime searchEnd = searchStart; // Default is ALL where we pass in the same LocalDateTime for both searchStart and searchEnd</span>
+        
+<span class="nc bnc" id="L223" title="All 2 branches missed.">        if(period.equals(Period.WEEK)){</span>
+<span class="nc" id="L224">            TemporalField tf = WeekFields.of(Locale.getDefault()).dayOfWeek();</span>
+<span class="nc" id="L225">            searchEnd = searchEnd.with(tf,7);</span>
+<span class="nc" id="L226">            searchStart = searchStart.with(tf,1);</span>
+<span class="nc" id="L227">        }</span>
+<span class="nc bnc" id="L228" title="All 2 branches missed.">        else if(period.equals(Period.MONTH)){</span>
+<span class="nc" id="L229">            searchEnd = searchEnd.with(TemporalAdjusters.lastDayOfMonth()).plusDays(1); // Go to midnight of the first day of next month</span>
+<span class="nc" id="L230">            searchStart = searchStart.with(TemporalAdjusters.firstDayOfMonth());</span>
+        }
+        
+<span class="nc" id="L233">        appointments.clear();</span>
+        
+        // Get Appointment Data
+        try{
+<span class="nc" id="L237">            appointments.addAll(AppointmentDaoImpl.getAppointmentList(userId,searchStart,searchEnd));</span>
+        }
+<span class="nc" id="L239">        catch(SQLException e){</span>
+<span class="nc" id="L240">            Logger.getLogger(&quot;errorlog.txt&quot;).log(Level.WARNING,null,e);</span>
+<span class="nc" id="L241">            displayErrorAlert(&quot;Error loading appointments from database&quot;);</span>
+<span class="nc" id="L242">        }</span>
+        
+        // Populate Table
+<span class="nc" id="L245">        appointmentTableView.setItems(appointments);</span>
+<span class="nc" id="L246">        tvSelAppointment = appointmentTableView.getSelectionModel();</span>
+<span class="nc" id="L247">    }</span>
+    
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+        
+        // Set this screen as return screen
+<span class="nc" id="L253">        lastScreen = AppScreen.CALENDARSCREEN;</span>
+        
+        // Setup Calendar Columns
+<span class="nc" id="L256">        dateCol.setCellValueFactory(new PropertyValueFactory&lt;&gt;(&quot;date&quot;));</span>
+<span class="nc" id="L257">        customerCol.setCellValueFactory(new PropertyValueFactory&lt;&gt;(&quot;customerName&quot;));</span>
+<span class="nc" id="L258">        titleCol.setCellValueFactory(new PropertyValueFactory&lt;&gt;(&quot;title&quot;));</span>
+<span class="nc" id="L259">        startCol.setCellValueFactory(new PropertyValueFactory&lt;&gt;(&quot;startTime&quot;));</span>
+<span class="nc" id="L260">        endCol.setCellValueFactory(new PropertyValueFactory&lt;&gt;(&quot;endTime&quot;));</span>
+<span class="nc" id="L261">        typeCol.setCellValueFactory(new PropertyValueFactory&lt;&gt;(&quot;type&quot;));</span>
+        
+        // Set Initial Date and Period
+<span class="nc" id="L264">        datePicker.setValue(lastSelectedDate); // Default to today</span>
+<span class="nc" id="L265">        periodComboBox.getItems().setAll(Period.values());</span>
+<span class="nc" id="L266">        periodComboBox.setValue(lastSelectedPeriod);</span>
+           
+        // Setup User ComboBox
+        try{
+<span class="nc" id="L270">            userList = getAllActiveUsers();</span>
+        }
+<span class="nc" id="L272">        catch(SQLException e){</span>
+<span class="nc" id="L273">            Logger.getLogger(&quot;errorlog.txt&quot;).log(Level.WARNING,null,e);</span>
+<span class="nc" id="L274">            displayErrorAlert(&quot;Error loading users from database&quot;);</span>
+<span class="nc" id="L275">        }</span>
+<span class="nc" id="L276">        userComboBox.setItems(userList);</span>
+<span class="nc" id="L277">        userComboBox.setValue(User.getCurrentUser());</span>
+        
+        // Populate Table with Data
+<span class="nc" id="L280">        refreshTable();</span>
+        
+        // Handle Image Buttons
+        //    Moves calendar forward/backward by 1 week/month
+<span class="nc" id="L284">        leftArrow.setOnMouseClicked((MouseEvent e) -&gt; {</span>
+<span class="nc" id="L285">            LocalDate initialDate = datePicker.getValue();</span>
+<span class="nc bnc" id="L286" title="All 2 branches missed.">            if(periodComboBox.getValue().equals(Period.WEEK))</span>
+<span class="nc" id="L287">                datePicker.setValue(initialDate.minusWeeks(1));</span>
+<span class="nc bnc" id="L288" title="All 2 branches missed.">            else if(periodComboBox.getValue().equals(Period.MONTH))</span>
+<span class="nc" id="L289">                datePicker.setValue(initialDate.minusMonths(1));</span>
+<span class="nc" id="L290">        });</span>
+        
+<span class="nc" id="L292">        rightArrow.setOnMouseClicked((MouseEvent e) -&gt; {</span>
+<span class="nc" id="L293">            LocalDate initialDate = datePicker.getValue();</span>
+<span class="nc bnc" id="L294" title="All 2 branches missed.">            if(periodComboBox.getValue().equals(Period.WEEK))</span>
+<span class="nc" id="L295">                datePicker.setValue(initialDate.plusWeeks(1));</span>
+<span class="nc bnc" id="L296" title="All 2 branches missed.">            else if(periodComboBox.getValue().equals(Period.MONTH))</span>
+<span class="nc" id="L297">                datePicker.setValue(initialDate.plusMonths(1));</span>
+<span class="nc" id="L298">        });</span>
+<span class="nc" id="L299">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

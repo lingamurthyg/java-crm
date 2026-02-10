@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AddressDaoImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Java CRM Application</a> &gt; <a href="index.source.html" class="el_package">DAO</a> &gt; <span class="el_source">AddressDaoImpl.java</span></div><h1>AddressDaoImpl.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package DAO;
+
+import static DAO.DBQuery.setPreparedStatement;
+import Model.Address;
+import static Model.User.getCurrentUser;
+import static Utilities.TimeFiles.dbStrNow;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * 
+ * @author Austin Wong
+ */
+<span class="fc" id="L20">public class AddressDaoImpl extends GeneralDaoImpl {    </span>
+    
+    //&lt;editor-fold defaultstate=&quot;collapsed&quot; desc=&quot;data retrieval&quot;&gt;
+    
+    // Retrieve address from DB using addressId
+    public static Address getAddress(int addressId) throws SQLException  {
+        
+        Address addressResult;
+<span class="nc" id="L28">        String sqlStatement = &quot;SELECT * FROM address WHERE addressId = ?&quot;;</span>
+<span class="nc" id="L29">        PreparedStatement ps = setPreparedStatement(sqlStatement);</span>
+<span class="nc" id="L30">        ps.setInt(1, addressId);</span>
+<span class="nc" id="L31">        ps.execute();</span>
+<span class="nc" id="L32">        ResultSet rs = ps.getResultSet();</span>
+        
+<span class="nc bnc" id="L34" title="All 2 branches missed.">        while(rs.next()){</span>
+<span class="nc" id="L35">            String address = rs.getString(&quot;address&quot;);</span>
+<span class="nc" id="L36">            String address2 = rs.getString(&quot;address2&quot;);</span>
+<span class="nc" id="L37">            int cityId = rs.getInt(&quot;cityId&quot;);</span>
+<span class="nc" id="L38">            String postalCode = rs.getString(&quot;postalCode&quot;);</span>
+<span class="nc" id="L39">            String phone = rs.getString(&quot;phone&quot;);</span>
+<span class="nc" id="L40">            getMetadata(rs);</span>
+            
+<span class="nc" id="L42">            addressResult = new Address(addressId, address, address2, cityId, postalCode, phone, createDateLdt, createdBy, lastUpdateLdt, lastUpdateBy);</span>
+<span class="nc" id="L43">            return addressResult;</span>
+        }
+<span class="nc" id="L45">        return null;        </span>
+    }
+    
+    // Retrieve address from DB using all fields except addressId
+    public static Address getAddress(String address, String address2, int cityId, String postalCode, String phone) throws SQLException  {
+        
+        Address addressResult;
+<span class="nc" id="L52">        String sqlStatement = &quot;SELECT * FROM address WHERE LOWER(address) = LOWER(?) AND LOWER(address2) = LOWER(?) AND cityId = ? AND postalCode = ? AND phone = ?&quot;;</span>
+<span class="nc" id="L53">        PreparedStatement ps = setPreparedStatement(sqlStatement);</span>
+<span class="nc" id="L54">        ps.setString(1, address);</span>
+<span class="nc" id="L55">        ps.setString(2, address2);</span>
+<span class="nc" id="L56">        ps.setInt(3, cityId);</span>
+<span class="nc" id="L57">        ps.setString(4, postalCode);</span>
+<span class="nc" id="L58">        ps.setString(5, phone);</span>
+<span class="nc" id="L59">        ps.execute();</span>
+<span class="nc" id="L60">        ResultSet rs = ps.getResultSet();</span>
+        
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        while(rs.next()){</span>
+<span class="nc" id="L63">            int addressId = rs.getInt(&quot;addressId&quot;);</span>
+<span class="nc" id="L64">            getMetadata(rs);</span>
+<span class="nc" id="L65">            addressResult = new Address(addressId, address, address2, cityId, postalCode, phone, createDateLdt, createdBy, lastUpdateLdt, lastUpdateBy);</span>
+<span class="nc" id="L66">            return addressResult;</span>
+        }
+        
+<span class="nc" id="L69">        return null;</span>
+    }
+    
+    //&lt;/editor-fold&gt;
+    
+    // Insert address into DB
+    public static Address insertAddress(String address, String address2, int cityId, String postalCode, String phone) throws SQLException {
+        
+<span class="nc" id="L77">        String createStatement = &quot;INSERT INTO address (address, address2, cityId, postalCode, phone, createDate, createdBy, lastUpdate, lastUpdateBy) VALUES(?,?,?,?,?,?,?,?,?)&quot;;</span>
+<span class="nc" id="L78">        PreparedStatement ps = setPreparedStatement(createStatement);</span>
+        
+<span class="nc" id="L80">        String userName = getCurrentUser().getUserName();</span>
+<span class="nc" id="L81">        String time = dbStrNow();</span>
+        
+<span class="nc" id="L83">        ps.setString(1, address);</span>
+<span class="nc" id="L84">        ps.setString(2, address2);</span>
+<span class="nc" id="L85">        ps.setInt(3, cityId);</span>
+<span class="nc" id="L86">        ps.setString(4,postalCode);</span>
+<span class="nc" id="L87">        ps.setString(5,phone);</span>
+<span class="nc" id="L88">        ps.setString(6, time);</span>
+<span class="nc" id="L89">        ps.setString(7, userName);</span>
+<span class="nc" id="L90">        ps.setString(8, time);</span>
+<span class="nc" id="L91">        ps.setString(9, userName);</span>
+<span class="nc" id="L92">        ps.execute();</span>
+        
+<span class="nc" id="L94">        return getAddress(address, address2, cityId, postalCode, phone);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

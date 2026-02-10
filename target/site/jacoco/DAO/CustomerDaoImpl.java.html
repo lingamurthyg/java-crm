@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomerDaoImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Java CRM Application</a> &gt; <a href="index.source.html" class="el_package">DAO</a> &gt; <span class="el_source">CustomerDaoImpl.java</span></div><h1>CustomerDaoImpl.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package DAO;
+
+import static DAO.DBQuery.setPreparedStatement;
+import Model.Customer;
+import static Model.User.getCurrentUser;
+import static Utilities.TimeFiles.dbStrNow;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
+/**
+ *
+ * @author Austin Wong
+ */
+<span class="fc" id="L22">public class CustomerDaoImpl extends GeneralDaoImpl{</span>
+    
+    //&lt;editor-fold defaultstate=&quot;collapsed&quot; desc=&quot;data retrieval&quot;&gt;
+    
+    // Retrieve customer from DB with customerId
+    public static Customer getCustomer(int customerId) throws SQLException {
+        
+        Customer customerResult;
+<span class="nc" id="L30">        String sqlStatement = &quot;SELECT * FROM customer WHERE customerId = ?&quot;;</span>
+<span class="nc" id="L31">        PreparedStatement ps = setPreparedStatement(sqlStatement);</span>
+<span class="nc" id="L32">        ps.setInt(1, customerId);</span>
+<span class="nc" id="L33">        ps.execute();</span>
+<span class="nc" id="L34">        ResultSet rs = ps.getResultSet();</span>
+        
+<span class="nc bnc" id="L36" title="All 2 branches missed.">        while(rs.next()){</span>
+<span class="nc" id="L37">            String customerName = rs.getString(&quot;customerName&quot;);</span>
+<span class="nc" id="L38">            int addressId = rs.getInt(&quot;addressId&quot;);</span>
+<span class="nc" id="L39">            Boolean active = rs.getBoolean(&quot;active&quot;);</span>
+<span class="nc" id="L40">            getMetadata(rs);</span>
+<span class="nc" id="L41">            customerResult = new Customer(customerId, customerName, addressId, active, createDateLdt, createdBy, lastUpdateLdt, lastUpdateBy);</span>
+<span class="nc" id="L42">            return customerResult;</span>
+        }
+        
+<span class="nc" id="L45">        return null;</span>
+    }
+    
+    
+    // Retrieve customer from DB with customerName and addressId
+    public static Customer getCustomer(String customerName, int addressId) throws SQLException {
+        
+        Customer customerResult;
+<span class="nc" id="L53">        String sqlStatement = &quot;SELECT * FROM customer WHERE LOWER(customerName) = LOWER(?) AND addressId = ?&quot;;</span>
+<span class="nc" id="L54">        PreparedStatement ps = setPreparedStatement(sqlStatement);</span>
+<span class="nc" id="L55">        ps.setString(1, customerName);</span>
+<span class="nc" id="L56">        ps.setInt(2, addressId);</span>
+<span class="nc" id="L57">        ps.execute();</span>
+<span class="nc" id="L58">        ResultSet rs = ps.getResultSet();</span>
+        
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        while(rs.next()){</span>
+<span class="nc" id="L61">            int customerId = rs.getInt(&quot;customerId&quot;);</span>
+<span class="nc" id="L62">            Boolean active = rs.getBoolean(&quot;active&quot;);</span>
+<span class="nc" id="L63">            getMetadata(rs);</span>
+<span class="nc" id="L64">            customerResult = new Customer(customerId, customerName, addressId, active, createDateLdt, createdBy, lastUpdateLdt, lastUpdateBy);</span>
+<span class="nc" id="L65">            return customerResult;</span>
+        }
+        
+<span class="nc" id="L68">        return null;</span>
+    }
+    
+    // Get a list of all active customers
+    public static ObservableList&lt;Customer&gt; getAllActiveCustomers() throws SQLException {
+<span class="nc" id="L73">        ObservableList&lt;Customer&gt; allCustomers=FXCollections.observableArrayList();</span>
+        
+<span class="nc" id="L75">        String selectStatement=&quot;SELECT * FROM customer WHERE active = true ORDER by customerId&quot;;</span>
+<span class="nc" id="L76">        PreparedStatement ps = setPreparedStatement(selectStatement);</span>
+<span class="nc" id="L77">        ps.execute();</span>
+<span class="nc" id="L78">        ResultSet rs = ps.getResultSet();</span>
+        
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        while(rs.next()){</span>
+<span class="nc" id="L81">            int customerId = rs.getInt(&quot;customerId&quot;);</span>
+<span class="nc" id="L82">            String customerName = rs.getString(&quot;customerName&quot;);</span>
+<span class="nc" id="L83">            int addressId = rs.getInt(&quot;addressId&quot;);</span>
+<span class="nc" id="L84">            Boolean active = rs.getBoolean(&quot;active&quot;);</span>
+<span class="nc" id="L85">            getMetadata(rs);</span>
+<span class="nc" id="L86">            Customer customerResult = new Customer(customerId, customerName, addressId, active, createDateLdt, createdBy, lastUpdateLdt, lastUpdateBy);</span>
+<span class="nc" id="L87">            customerResult.setAddressObj();</span>
+<span class="nc" id="L88">            allCustomers.add(customerResult);</span>
+<span class="nc" id="L89">        }</span>
+        
+<span class="nc" id="L91">        return allCustomers;</span>
+    }
+    
+    //&lt;/editor-fold&gt;
+    
+    //&lt;editor-fold defaultstate=&quot;collapsed&quot; desc=&quot;data setting&quot;&gt;
+    
+    // Insert customer into DB
+    public static Customer insertCustomer(String customerName, int addressId) throws SQLException {
+        
+<span class="nc" id="L101">        String createStatement = &quot;INSERT INTO customer (customerName, addressId, active, createDate, createdBy, lastUpdate, lastUpdateBy) VALUES(?,?,?,?,?,?,?)&quot;;</span>
+<span class="nc" id="L102">        PreparedStatement ps = setPreparedStatement(createStatement);</span>
+        
+<span class="nc" id="L104">        String userName = getCurrentUser().getUserName();</span>
+<span class="nc" id="L105">        String time = dbStrNow();</span>
+        
+<span class="nc" id="L107">        ps.setString(1, customerName);</span>
+<span class="nc" id="L108">        ps.setInt(2, addressId);</span>
+<span class="nc" id="L109">        ps.setBoolean(3, true);</span>
+<span class="nc" id="L110">        ps.setString(4, time);</span>
+<span class="nc" id="L111">        ps.setString(5, userName);</span>
+<span class="nc" id="L112">        ps.setString(6, time);</span>
+<span class="nc" id="L113">        ps.setString(7, userName);</span>
+<span class="nc" id="L114">        ps.execute();</span>
+        
+<span class="nc" id="L116">        return getCustomer(customerName, addressId);</span>
+    }    
+    
+    // Delete customer and linked appointments
+    public static int deleteCustomer(int customerId) throws SQLException {
+<span class="nc" id="L121">        String deleteStatement = &quot;DELETE FROM appointment WHERE customerId = ?&quot;;</span>
+<span class="nc" id="L122">        PreparedStatement ps = setPreparedStatement(deleteStatement);</span>
+
+<span class="nc" id="L124">        ps.setInt(1, customerId);</span>
+<span class="nc" id="L125">        ps.execute();</span>
+        
+<span class="nc" id="L127">        deleteStatement = &quot;DELETE FROM customer WHERE customerId = ?&quot;;</span>
+<span class="nc" id="L128">        ps = setPreparedStatement(deleteStatement);</span>
+<span class="nc" id="L129">        ps.setInt(1, customerId);</span>
+<span class="nc" id="L130">        ps.execute();</span>
+        
+<span class="nc" id="L132">        return ps.getUpdateCount();</span>
+    }
+    
+    // Update customer
+    public static int updateCustomer(String customerName, int addressId, int customerId) throws SQLException {
+<span class="nc" id="L137">        String updateStatement = &quot;UPDATE customer SET customerName = ?, addressId = ? WHERE customerId = ?&quot;;</span>
+<span class="nc" id="L138">        PreparedStatement ps = setPreparedStatement(updateStatement);</span>
+<span class="nc" id="L139">        ps.setString(1, customerName);</span>
+<span class="nc" id="L140">        ps.setInt(2, addressId);</span>
+<span class="nc" id="L141">        ps.setInt(3, customerId);</span>
+<span class="nc" id="L142">        ps.execute();</span>
+<span class="nc" id="L143">        return ps.getUpdateCount();</span>
+    }
+    
+    //&lt;/editor-fold&gt;
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

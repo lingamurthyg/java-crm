@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AddAppointmentScreenController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Java CRM Application</a> &gt; <a href="index.source.html" class="el_package">Controller</a> &gt; <span class="el_source">AddAppointmentScreenController.java</span></div><h1>AddAppointmentScreenController.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package Controller;
+
+import DAO.AppointmentDaoImpl;
+import static DAO.AppointmentDaoImpl.checkAppointmentOverlap;
+import Model.Appointment;
+import Model.Customer;
+import Model.User;
+import Utilities.BusinessException;
+import static Utilities.TimeFiles.createLocalDateTime;
+import static Utilities.TimeFiles.getAvailableAppointmentTimes;
+import java.net.URL;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.ResourceBundle;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import java.time.LocalDateTime;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import static DAO.CustomerDaoImpl.getAllActiveCustomers;
+import java.time.LocalTime;
+import javafx.event.Event;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+
+/**
+ * Controls screen for adding new appointments
+ *
+ * @author Austin Wong
+ */
+<span class="fc" id="L42">public class AddAppointmentScreenController extends GeneralController implements Initializable {</span>
+    
+    //&lt;editor-fold defaultstate=&quot;collapsed&quot; desc=&quot;ui-variables&quot;&gt;
+    @FXML
+    private TextField contactTxt;
+
+    @FXML
+    private ComboBox&lt;String&gt; endTimeCombo;
+
+    @FXML
+    private DatePicker datePicker;
+
+    @FXML
+    private Label errorLbl;
+
+    @FXML
+    private TextField locationTxt;
+
+    @FXML
+    private TextField typeTxt;
+
+    @FXML
+    private TextField titleTxt;
+
+    @FXML
+    private Button backBtn;
+
+    @FXML
+    private ComboBox&lt;String&gt; startTimeCombo;
+
+    @FXML
+    private TextField urlTxt;
+
+    @FXML
+    private TextField descriptionTxt;
+
+    @FXML
+    private Button saveBtn;
+    
+    @FXML
+    private ComboBox&lt;Customer&gt; customerComboBox;
+    //&lt;/editor-fold&gt;
+    
+    //&lt;editor-fold defaultstate=&quot;collapsed&quot; desc=&quot;actions&quot;&gt;
+    
+    // Create a new appointment and save to DB
+    @FXML
+    void onActionSave(ActionEvent event) {
+<span class="nc" id="L90">        submit(event);</span>
+<span class="nc" id="L91">    }</span>
+
+    // Return to previous screen
+    @FXML
+    void onActionReturn(ActionEvent event) {
+<span class="nc" id="L96">        back(event);</span>
+<span class="nc" id="L97">    }</span>
+    
+    @FXML
+    void onKeyPressedSubmit(KeyEvent event){
+<span class="nc bnc" id="L101" title="All 2 branches missed.">        if(event.getCode() == KeyCode.ENTER){</span>
+<span class="nc" id="L102">            submit(event);</span>
+        }
+<span class="nc" id="L104">    }</span>
+    //&lt;/editor-fold&gt;
+    
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+        
+        // Populate ComboBoxes for Appointment Times
+<span class="nc" id="L111">        startTimeCombo.setItems(getAvailableAppointmentTimes());</span>
+<span class="nc" id="L112">        endTimeCombo.setItems(getAvailableAppointmentTimes());</span>
+        
+        // Pre-select times
+<span class="nc" id="L115">        startTimeCombo.getSelectionModel().selectFirst();</span>
+<span class="nc" id="L116">        endTimeCombo.getSelectionModel().select(2);</span>
+        
+        // Populate Customer ComboBox
+        try{
+<span class="nc" id="L120">            customerComboBox.setItems(getAllActiveCustomers());</span>
+        }
+<span class="nc" id="L122">        catch(SQLException e){</span>
+<span class="nc" id="L123">            handleSQLException(e);</span>
+<span class="nc" id="L124">        }</span>
+        
+        // Pre-select Customer
+<span class="nc" id="L127">        Customer customer = Customer.getCurrentCustomer();</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">        if (customer instanceof Customer)</span>
+<span class="nc" id="L129">            customerComboBox.setValue(customer);</span>
+        
+<span class="nc" id="L131">    }</span>
+    
+    private void handleSQLException(SQLException e){
+<span class="nc" id="L134">        Logger.getLogger(&quot;errorlog.txt&quot;).log(Level.WARNING, null, e);</span>
+<span class="nc" id="L135">        displayErrorAlert(&quot;Error adding appointment to database&quot;);</span>
+<span class="nc" id="L136">    }</span>
+    
+    private void submit(Event event){
+        // No Blank Text Fields Allowed
+<span class="nc bnc" id="L140" title="All 2 branches missed.">        if (checkFields(typeTxt)){</span>
+<span class="nc" id="L141">            displayMessage(errorLbl,errorStr);</span>
+<span class="nc" id="L142">            return;</span>
+        }
+
+        // Appointment date must be selected
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        if(datePicker.getValue() == null){</span>
+<span class="nc" id="L147">            displayMessage(errorLbl,&quot;Select a date&quot;);</span>
+<span class="nc" id="L148">            return;</span>
+        }
+        
+        // Customer must be selected
+<span class="nc" id="L152">        Customer customerComboBoxSelection = customerComboBox.getValue();</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">        if(customerComboBoxSelection == null){</span>
+<span class="nc" id="L154">            displayMessage(errorLbl,&quot;Select a customer&quot;);</span>
+<span class="nc" id="L155">            return;</span>
+        }
+        
+        // Get selected customer, date, and time info
+<span class="nc" id="L159">        int customerId = customerComboBoxSelection.getCustomerId();</span>
+<span class="nc" id="L160">        LocalDate date = datePicker.getValue();</span>
+<span class="nc" id="L161">        String startTime = startTimeCombo.getValue();</span>
+<span class="nc" id="L162">        String endTime = endTimeCombo.getValue();</span>
+<span class="nc" id="L163">        LocalDateTime startDateTime = createLocalDateTime(date,startTime);</span>
+<span class="nc" id="L164">        LocalDateTime endDateTime = createLocalDateTime(date,endTime);</span>
+        
+        // Validate times
+<span class="nc bnc" id="L167" title="All 2 branches missed.">        if(!(startDateTime.isBefore(endDateTime))){</span>
+<span class="nc" id="L168">            displayMessage(errorLbl,&quot;Start time must be before end time&quot;);</span>
+<span class="nc" id="L169">            return;</span>
+        }
+        
+        // Appointment Times should be during business hours (8am-5pm)
+        // In this application, weekend hours are allowed (within the same 8am-5pm timeframe)
+<span class="nc bnc" id="L174" title="All 2 branches missed.">        assert (!startDateTime.isBefore(LocalDateTime.of(date, LocalTime.of(8,0))));</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">        assert (!startDateTime.isAfter(LocalDateTime.of(date,LocalTime.of(17, 0))));</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">        assert (!endDateTime.isAfter(LocalDateTime.of(date,LocalTime.of(17,0))));</span>
+
+        // Gather input text
+<span class="nc" id="L179">        String location = locationTxt.getText();</span>
+<span class="nc" id="L180">        String type = typeTxt.getText();</span>
+<span class="nc" id="L181">        String title = titleTxt.getText();</span>
+<span class="nc" id="L182">        String contact = contactTxt.getText();</span>
+<span class="nc" id="L183">        String url = urlTxt.getText();</span>
+<span class="nc" id="L184">        String description = descriptionTxt.getText();</span>
+        
+        // Try to add appointment to DB
+        try{  
+            
+            // Check for overlapping appointments
+<span class="nc bnc" id="L190" title="All 2 branches missed.">            if(checkAppointmentOverlap(User.getCurrentUser().getUserId(), customerId, startDateTime,endDateTime,false))</span>
+<span class="nc" id="L191">                throw new BusinessException(&quot;Appointment time overlaps with existing appointment&quot;);</span>
+            
+<span class="nc" id="L193">            Customer.setCurrentCustomer(customerComboBoxSelection);</span>
+            
+            // Check for existing duplicate appointment. If none exist, add appointment.
+<span class="nc" id="L196">            Appointment appointment = AppointmentDaoImpl.getAppointment(startDateTime, endDateTime);</span>
+<span class="nc bnc" id="L197" title="All 2 branches missed.">            if(!(appointment instanceof Appointment)){</span>
+<span class="nc" id="L198">                AppointmentDaoImpl.insertAppointment(title, description, location, contact, type, url, startDateTime, endDateTime);</span>
+<span class="nc" id="L199">                displayNotification(event, &quot;Appointment successfully added!&quot;);</span>
+<span class="nc" id="L200">                back(event);</span>
+            }
+            else
+<span class="nc" id="L203">                throw new BusinessException(&quot;Appointment already exists&quot;);</span>
+        }
+<span class="nc" id="L205">        catch(SQLException e){</span>
+<span class="nc" id="L206">            handleSQLException(e);</span>
+        }
+<span class="nc" id="L208">        catch(BusinessException e){</span>
+<span class="nc" id="L209">            displayMessage(errorLbl,e.getMessage());</span>
+<span class="nc" id="L210">        }</span>
+<span class="nc" id="L211">    }</span>
+    
+    private void back(Event event){
+<span class="nc" id="L214">        Customer.setCurrentCustomer(null);</span>
+<span class="nc" id="L215">        Appointment.setCurrentAppointment(null);</span>
+<span class="nc" id="L216">        returnToLastScreen(event);</span>
+<span class="nc" id="L217">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

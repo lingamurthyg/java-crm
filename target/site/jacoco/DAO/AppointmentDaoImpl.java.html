@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AppointmentDaoImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Java CRM Application</a> &gt; <a href="index.source.html" class="el_package">DAO</a> &gt; <span class="el_source">AppointmentDaoImpl.java</span></div><h1>AppointmentDaoImpl.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package DAO;
+
+import static DAO.DBQuery.setPreparedStatement;
+import Model.Appointment;
+import Model.Customer;
+import Model.User;
+import static Model.User.getCurrentUser;
+import Utilities.RBMain;
+import static Utilities.TimeFiles.dbStrNow;
+import static Utilities.TimeFiles.dbStrToLocalDateTime;
+import static Utilities.TimeFiles.localDateTimeToDBStr;
+import static Utilities.TimeFiles.localDateTimeToUITime;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ResourceBundle;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
+/**
+ *
+ * @author Austin Wong
+ */
+<span class="fc" id="L31">public class AppointmentDaoImpl extends GeneralDaoImpl{</span>
+    
+    //&lt;editor-fold defaultstate=&quot;collapsed&quot; desc=&quot;data retrieval&quot;&gt;
+    
+    // Retrieve appointment from DB with customerId, userId, start, and end
+    public static Appointment getAppointment(LocalDateTime start, LocalDateTime end) throws SQLException {
+        
+        Appointment appointmentResult;
+<span class="nc" id="L39">        String sqlStatement = &quot;SELECT * FROM appointment WHERE customerId = ? AND userId = ? AND start = ? AND end = ?&quot;;</span>
+<span class="nc" id="L40">        PreparedStatement ps = setPreparedStatement(sqlStatement);</span>
+<span class="nc" id="L41">        ps.setInt(1, Customer.getCurrentCustomer().getCustomerId());</span>
+<span class="nc" id="L42">        ps.setInt(2, User.getCurrentUser().getUserId());</span>
+<span class="nc" id="L43">        ps.setString(3, localDateTimeToDBStr(start));</span>
+<span class="nc" id="L44">        ps.setString(4, localDateTimeToDBStr(end));</span>
+<span class="nc" id="L45">        ps.execute();</span>
+<span class="nc" id="L46">        ResultSet rs = ps.getResultSet();</span>
+        
+<span class="nc bnc" id="L48" title="All 2 branches missed.">        while(rs.next()){</span>
+<span class="nc" id="L49">            int appointmentId = rs.getInt(&quot;appointmentId&quot;);</span>
+<span class="nc" id="L50">            String title = rs.getString(&quot;title&quot;);</span>
+<span class="nc" id="L51">            String description = rs.getString(&quot;description&quot;);</span>
+<span class="nc" id="L52">            String location = rs.getString(&quot;location&quot;);</span>
+<span class="nc" id="L53">            String contact = rs.getString(&quot;contact&quot;);</span>
+<span class="nc" id="L54">            String type = rs.getString(&quot;type&quot;);</span>
+<span class="nc" id="L55">            String url = rs.getString(&quot;url&quot;);</span>
+            
+<span class="nc" id="L57">            getMetadata(rs);</span>
+<span class="nc" id="L58">            appointmentResult = new Appointment(appointmentId, Customer.getCurrentCustomer().getCustomerId(), User.getCurrentUser().getUserId(), title, description, location, contact, type, url, start, end, createDateLdt, createdBy, lastUpdateLdt, lastUpdateBy);</span>
+<span class="nc" id="L59">            return appointmentResult;</span>
+        }
+        
+<span class="nc" id="L62">        return null;</span>
+    }
+    
+    // Get a list of appointments for currentUser between two LocalDateTimes
+    public static ObservableList&lt;Appointment&gt; getAppointmentList(int userId, LocalDateTime searchStart, LocalDateTime searchEnd) throws SQLException {
+<span class="nc" id="L67">        ObservableList&lt;Appointment&gt; apptList =FXCollections.observableArrayList();</span>
+        String selectStatement;
+        PreparedStatement ps;
+        
+        // if LocalDateTimes are the same, return ALL appointments for currentUser
+<span class="nc bnc" id="L72" title="All 2 branches missed.">        if(searchStart.equals(searchEnd)){</span>
+<span class="nc" id="L73">           selectStatement = &quot;SELECT * FROM appointment WHERE userId = ? ORDER BY start&quot;;</span>
+<span class="nc" id="L74">           ps = setPreparedStatement(selectStatement);</span>
+        }
+        else{
+<span class="nc" id="L77">            selectStatement=&quot;SELECT * FROM appointment WHERE userId = ? AND start BETWEEN ? AND ? ORDER BY start&quot;;</span>
+<span class="nc" id="L78">            ps = setPreparedStatement(selectStatement);</span>
+<span class="nc" id="L79">            ps.setString(2, localDateTimeToDBStr(searchStart));</span>
+<span class="nc" id="L80">            ps.setString(3, localDateTimeToDBStr(searchEnd));</span>
+        }
+<span class="nc" id="L82">        ps.setInt(1, userId);</span>
+<span class="nc" id="L83">        ps.execute();</span>
+<span class="nc" id="L84">        ResultSet rs = ps.getResultSet();</span>
+        
+<span class="nc bnc" id="L86" title="All 2 branches missed.">        while(rs.next()){</span>
+            
+<span class="nc" id="L88">            int appointmentId = rs.getInt(&quot;appointmentId&quot;);</span>
+<span class="nc" id="L89">            int customerId = rs.getInt(&quot;customerId&quot;);</span>
+<span class="nc" id="L90">            String title = rs.getString(&quot;title&quot;);</span>
+<span class="nc" id="L91">            String description = rs.getString(&quot;description&quot;);</span>
+<span class="nc" id="L92">            String location = rs.getString(&quot;location&quot;);</span>
+<span class="nc" id="L93">            String contact = rs.getString(&quot;contact&quot;);</span>
+<span class="nc" id="L94">            String type = rs.getString(&quot;type&quot;);</span>
+<span class="nc" id="L95">            String url = rs.getString(&quot;url&quot;);</span>
+<span class="nc" id="L96">            String startStr = rs.getString(&quot;start&quot;);</span>
+<span class="nc" id="L97">            String endStr = rs.getString(&quot;end&quot;);</span>
+            
+<span class="nc" id="L99">            LocalDateTime start = dbStrToLocalDateTime(startStr);</span>
+<span class="nc" id="L100">            LocalDateTime end = dbStrToLocalDateTime(endStr);</span>
+<span class="nc" id="L101">            getMetadata(rs);</span>
+            
+<span class="nc" id="L103">            Appointment appointmentResult = new Appointment(appointmentId, customerId, userId, title, description, location, contact, type, url, start, end, createDateLdt, createdBy, lastUpdateLdt, lastUpdateBy);</span>
+<span class="nc" id="L104">            apptList.add(appointmentResult);</span>
+<span class="nc" id="L105">        }</span>
+        
+<span class="nc" id="L107">        return apptList;</span>
+    }
+    
+    // Creates a report of the number of various types of appointments each month in a given time period
+    public static String getTypeReport(ObservableList&lt;String&gt; searchTimes, Integer userId) throws SQLException {
+        
+<span class="nc" id="L113">        String report = &quot;&quot;;</span>
+<span class="nc" id="L114">        String startSearch = searchTimes.get(0);</span>
+<span class="nc" id="L115">        String endSearch = searchTimes.get(1);</span>
+<span class="nc" id="L116">        String currentMonth = &quot;&quot;;</span>
+        String selectStatement;
+        PreparedStatement ps;
+        
+        // Report for specific user
+<span class="nc bnc" id="L121" title="All 2 branches missed.">        if(userId instanceof Integer){</span>
+<span class="nc" id="L122">            selectStatement=&quot;SELECT CONCAT(MONTHNAME(start),\&quot; \&quot;,YEAR(start)) \&quot;apptperiod\&quot;, type, count(type) \&quot;appointments\&quot; FROM appointment &quot; + </span>
+                                &quot;WHERE userId = ? AND start BETWEEN ? AND ? &quot; +
+                                &quot;GROUP BY apptperiod, type &quot; +
+                                &quot;ORDER BY ANY_VALUE(start)&quot;;
+<span class="nc" id="L126">            ps = setPreparedStatement(selectStatement);</span>
+<span class="nc" id="L127">            ps.setInt(1, userId);</span>
+<span class="nc" id="L128">            ps.setString(2, startSearch);</span>
+<span class="nc" id="L129">            ps.setString(3, endSearch);</span>
+        }
+        // Report for ALL users
+        else{
+<span class="nc" id="L133">            selectStatement=&quot;SELECT CONCAT(MONTHNAME(start),\&quot; \&quot;,YEAR(start)) \&quot;apptperiod\&quot;, type, count(type) \&quot;appointments\&quot; FROM appointment &quot; + </span>
+                            &quot;WHERE start BETWEEN ? AND ? &quot; +
+                            &quot;GROUP BY apptperiod, type &quot; +
+                            &quot;ORDER BY ANY_VALUE(start)&quot;;
+<span class="nc" id="L137">            ps = setPreparedStatement(selectStatement);</span>
+<span class="nc" id="L138">            ps.setString(1, startSearch);</span>
+<span class="nc" id="L139">            ps.setString(2, endSearch);</span>
+        }
+        
+<span class="nc" id="L142">        ps.execute();</span>
+<span class="nc" id="L143">        ResultSet rs = ps.getResultSet();</span>
+        
+<span class="nc bnc" id="L145" title="All 2 branches missed.">        while(rs.next()){</span>
+<span class="nc" id="L146">            String month = rs.getString(&quot;apptperiod&quot;);</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">            if(!(month.equals(currentMonth))){</span>
+<span class="nc" id="L148">                currentMonth = month;</span>
+<span class="nc" id="L149">                report = report + &quot;\n&quot; + &quot;   &quot; + month + &quot;\n&quot;;</span>
+            }
+<span class="nc" id="L151">            String type = rs.getString(&quot;type&quot;);</span>
+<span class="nc" id="L152">            int appointments = rs.getInt(&quot;appointments&quot;);</span>
+<span class="nc" id="L153">            report = report + type + &quot;: &quot; + appointments + &quot;\n&quot;;</span>
+<span class="nc" id="L154">        }</span>
+        
+<span class="nc" id="L156">        report = report.replaceFirst(&quot;\n&quot;, &quot;&quot;);</span>
+        
+<span class="nc" id="L158">        return report;</span>
+    }
+    
+    // Creates a report of the average # of appointments among all consultants by month in a given time period
+    public static String getAvgApptReport(ObservableList&lt;String&gt; searchTimes) throws SQLException {
+        
+<span class="nc" id="L164">        String report = &quot;&quot;;</span>
+<span class="nc" id="L165">        String startSearch = searchTimes.get(0);</span>
+<span class="nc" id="L166">        String endSearch = searchTimes.get(1);</span>
+        String selectStatement;
+        PreparedStatement ps;
+
+<span class="nc" id="L170">        selectStatement=&quot;SELECT totappts.apptperiod, avg(totappts.appointments) \&quot;appointments\&quot; FROM &quot; +</span>
+                           &quot;(SELECT count(*) \&quot;appointments\&quot;, userId, ANY_VALUE(start) \&quot;start\&quot;, concat(MONTHNAME(start),\&quot; \&quot;,year(start)) \&quot;apptperiod\&quot; &quot; +
+                           &quot;FROM appointment WHERE start BETWEEN ? AND ? &quot; + 
+                           &quot;GROUP BY userId, apptperiod) totappts &quot; + 
+                        &quot;GROUP BY totappts.apptperiod ORDER BY totappts.start&quot;;
+<span class="nc" id="L175">        ps = setPreparedStatement(selectStatement);</span>
+<span class="nc" id="L176">        ps.setString(1, startSearch);</span>
+<span class="nc" id="L177">        ps.setString(2, endSearch);</span>
+        
+<span class="nc" id="L179">        ps.execute();</span>
+<span class="nc" id="L180">        ResultSet rs = ps.getResultSet();</span>
+        
+<span class="nc bnc" id="L182" title="All 2 branches missed.">        while(rs.next()){</span>
+<span class="nc" id="L183">            String month = rs.getString(&quot;apptperiod&quot;);</span>
+<span class="nc" id="L184">            double appointments = rs.getDouble(&quot;appointments&quot;);</span>
+            
+<span class="nc" id="L186">            report = report + month + &quot;: &quot; + appointments + &quot;\n&quot;;</span>
+<span class="nc" id="L187">        }</span>
+        
+<span class="nc" id="L189">        return report;</span>
+    }
+    
+    //&lt;/editor-fold&gt;
+    
+    //&lt;editor-fold defaultstate=&quot;collapsed&quot; desc=&quot;data setting&quot;&gt;
+    
+    // Insert appointment into DB
+    public static Appointment insertAppointment(String title, String description, String location, String contact, String type, String url, LocalDateTime start, LocalDateTime end) throws SQLException {
+        
+<span class="nc" id="L199">        String createStatement = &quot;INSERT INTO appointment (customerId, userId, title, description, location, contact, type, url, start, end, createDate, createdBy, lastUpdate, lastUpdateBy) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)&quot;;</span>
+<span class="nc" id="L200">        PreparedStatement ps = setPreparedStatement(createStatement);</span>
+        
+<span class="nc" id="L202">        String userName = getCurrentUser().getUserName();</span>
+<span class="nc" id="L203">        String time = dbStrNow();</span>
+        
+<span class="nc" id="L205">        ps.setInt(1, Customer.getCurrentCustomer().getCustomerId());</span>
+<span class="nc" id="L206">        ps.setInt(2, User.getCurrentUser().getUserId());</span>
+<span class="nc" id="L207">        ps.setString(3, title);</span>
+<span class="nc" id="L208">        ps.setString(4, description);</span>
+<span class="nc" id="L209">        ps.setString(5, location);</span>
+<span class="nc" id="L210">        ps.setString(6, contact);</span>
+<span class="nc" id="L211">        ps.setString(7, type);</span>
+<span class="nc" id="L212">        ps.setString(8, url);</span>
+<span class="nc" id="L213">        ps.setString(9, localDateTimeToDBStr(start));</span>
+<span class="nc" id="L214">        ps.setString(10, localDateTimeToDBStr(end));</span>
+<span class="nc" id="L215">        ps.setString(11, time);</span>
+<span class="nc" id="L216">        ps.setString(12, userName);</span>
+<span class="nc" id="L217">        ps.setString(13, time);</span>
+<span class="nc" id="L218">        ps.setString(14, userName);</span>
+<span class="nc" id="L219">        ps.execute();</span>
+        
+<span class="nc" id="L221">        return getAppointment(start, end);</span>
+    }
+        
+    // Delete appointment from DB
+    public static int deleteAppointment(int appointmentId) throws SQLException {
+<span class="nc" id="L226">        String deleteStatement = &quot;DELETE FROM appointment WHERE appointmentId = ?&quot;;</span>
+<span class="nc" id="L227">        PreparedStatement ps = setPreparedStatement(deleteStatement);</span>
+<span class="nc" id="L228">        ps.setInt(1, appointmentId);</span>
+<span class="nc" id="L229">        ps.execute();</span>
+<span class="nc" id="L230">        return ps.getUpdateCount();</span>
+    }
+    
+    // Update appointment in DB
+    public static int updateAppointment(String title, String description, String location, String contact, String type, String url, LocalDateTime start, LocalDateTime end, int customerId, int appointmentId) throws SQLException {
+<span class="nc" id="L235">        String updateStatement = &quot;UPDATE appointment SET title = ?, description = ?, location = ?, contact = ?, type = ?, url = ?, start = ?, end = ?, lastUpdate = ?, lastUpdateBy = ?, customerId = ? WHERE appointmentId = ?&quot;;</span>
+<span class="nc" id="L236">        PreparedStatement ps = setPreparedStatement(updateStatement);</span>
+        
+<span class="nc" id="L238">        String userName = getCurrentUser().getUserName();</span>
+<span class="nc" id="L239">        String time = dbStrNow();</span>
+        
+<span class="nc" id="L241">        ps.setString(1, title);</span>
+<span class="nc" id="L242">        ps.setString(2, description);</span>
+<span class="nc" id="L243">        ps.setString(3, location);</span>
+<span class="nc" id="L244">        ps.setString(4, contact);</span>
+<span class="nc" id="L245">        ps.setString(5, type);</span>
+<span class="nc" id="L246">        ps.setString(6, url);</span>
+<span class="nc" id="L247">        ps.setString(7, localDateTimeToDBStr(start));</span>
+<span class="nc" id="L248">        ps.setString(8, localDateTimeToDBStr(end));</span>
+<span class="nc" id="L249">        ps.setString(9, time);</span>
+<span class="nc" id="L250">        ps.setString(10, userName);</span>
+<span class="nc" id="L251">        ps.setInt(11, customerId);</span>
+<span class="nc" id="L252">        ps.setInt(12, appointmentId);</span>
+<span class="nc" id="L253">        ps.execute();</span>
+<span class="nc" id="L254">        return ps.getUpdateCount();</span>
+    }
+    
+    //&lt;/editor-fold&gt;
+    
+    //&lt;editor-fold defaultstate=&quot;collapsed&quot; desc=&quot;validation&quot;&gt;
+    
+    // Returns true if appointment dates overlap with existing appointment, false otherwise
+    public static boolean checkAppointmentOverlap(int userId, int customerId, LocalDateTime searchStart, LocalDateTime searchEnd, Boolean checkId) throws SQLException {
+        
+        String selectStatement;
+        PreparedStatement ps;
+        
+        // For 'start BETWEEN ? AND ?'
+<span class="nc" id="L268">        String startStr1 = localDateTimeToDBStr(searchStart);</span>
+<span class="nc" id="L269">        LocalDateTime searchEndAdj = searchEnd.minusSeconds(1);</span>
+<span class="nc" id="L270">        String endStr1 = localDateTimeToDBStr(searchEndAdj);</span>
+        
+        // For 'end BETWEEN ? AND ?'
+<span class="nc" id="L273">        LocalDateTime searchStartAdj = searchStart.plusSeconds(1);</span>
+<span class="nc" id="L274">        String startStr2 = localDateTimeToDBStr(searchStartAdj);</span>
+<span class="nc" id="L275">        String endStr2 = localDateTimeToDBStr(searchEnd);</span>
+
+        // Because BETWEEN is inclusive, we need to ensure that:
+        // if DB appt starts when Local appt ends, that is okay
+        // If DB appt ends when Local appt starts, that is okay
+        // So  start BETWEEN searchStart AND searchEnd - 1 ms
+        // and end BETWEEN searchStart + 1 ms AND searchEnd
+        // both satisfy this
+        
+        // Check for appointments that overlap for a given user or a given customer
+<span class="nc" id="L285">        selectStatement=&quot;SELECT appointmentId FROM appointment WHERE (userId = ? OR customerId = ?) AND (start BETWEEN ? AND ? OR end BETWEEN ? and ?)&quot;;</span>
+        
+<span class="nc" id="L287">        ps = setPreparedStatement(selectStatement);</span>
+<span class="nc" id="L288">        ps.setInt(1, userId);</span>
+<span class="nc" id="L289">        ps.setInt(2, customerId);</span>
+<span class="nc" id="L290">        ps.setString(3, startStr1);</span>
+<span class="nc" id="L291">        ps.setString(4, endStr1);</span>
+<span class="nc" id="L292">        ps.setString(5, startStr2);</span>
+<span class="nc" id="L293">        ps.setString(6, endStr2);</span>
+<span class="nc" id="L294">        ps.execute();</span>
+<span class="nc" id="L295">        ResultSet rs = ps.getResultSet();</span>
+        
+        // Looking for any overlapping appointment besides the one being updated
+<span class="nc bnc" id="L298" title="All 2 branches missed.">        if(checkId){</span>
+<span class="nc" id="L299">            int currentAppointmentId = Appointment.getCurrentAppointment().getAppointmentId();</span>
+<span class="nc bnc" id="L300" title="All 2 branches missed.">            while(rs.next()){</span>
+<span class="nc" id="L301">                int dbAppointmentId = rs.getInt(&quot;appointmentId&quot;);</span>
+<span class="nc bnc" id="L302" title="All 2 branches missed.">                if (dbAppointmentId != currentAppointmentId)</span>
+<span class="nc" id="L303">                    return true;</span>
+<span class="nc" id="L304">            }</span>
+<span class="nc" id="L305">            return false;</span>
+        }
+        // Looking for ANY overlapping appointment (adding, not updating appointment)
+        else{
+<span class="nc bnc" id="L309" title="All 2 branches missed.">            while(rs.next()){</span>
+<span class="nc" id="L310">                return true;</span>
+            }
+<span class="nc" id="L312">            return false;</span>
+        }
+    }  
+    
+    /**
+     * Checks for an appointment within 15 minutes of current time
+     * @return Alert message (String) or empty string if no appointment found
+     * @throws SQLException 
+     */
+    public static String checkUpcomingAppt() throws SQLException {
+        
+        String selectStatement;
+        PreparedStatement ps;
+<span class="nc" id="L325">        int userId = User.getCurrentUser().getUserId();</span>
+<span class="nc" id="L326">        LocalDateTime now = LocalDateTime.now();</span>
+<span class="nc" id="L327">        LocalDateTime startLdt = now.plusMinutes(15);</span>
+<span class="nc" id="L328">        String startSearch = localDateTimeToDBStr(startLdt);</span>
+<span class="nc" id="L329">        String endSearch = localDateTimeToDBStr(now);</span>
+
+<span class="nc" id="L331">        selectStatement=&quot;select customerName, start from appointment &quot; + </span>
+                        &quot;inner join customer on customer.customerId = appointment.customerId &quot; +
+                        &quot;where userId = ? AND start &lt;= ? AND end &gt; ?&quot;;
+<span class="nc" id="L334">        ps = setPreparedStatement(selectStatement);</span>
+<span class="nc" id="L335">        ps.setInt(1, userId);</span>
+<span class="nc" id="L336">        ps.setString(2, startSearch);</span>
+<span class="nc" id="L337">        ps.setString(3, endSearch);</span>
+        
+<span class="nc" id="L339">        ps.execute();</span>
+<span class="nc" id="L340">        ResultSet rs = ps.getResultSet();</span>
+        
+<span class="nc bnc" id="L342" title="All 2 branches missed.">        if(rs.next()){</span>
+            
+<span class="nc" id="L344">            String customerName = rs.getString(&quot;customerName&quot;);</span>
+<span class="nc" id="L345">            String start = rs.getString(&quot;start&quot;);</span>
+<span class="nc" id="L346">            LocalDateTime apptTime = dbStrToLocalDateTime(start);</span>
+<span class="nc" id="L347">            long minuteDiff = ChronoUnit.MINUTES.between(now,apptTime);</span>
+<span class="nc" id="L348">            long secondDiff = ChronoUnit.SECONDS.between(now,apptTime);</span>
+<span class="nc" id="L349">            ResourceBundle rb = RBMain.getRb();</span>
+            String alertMsg;
+            
+<span class="nc bnc" id="L352" title="All 2 branches missed.">            if(secondDiff &gt; 0){</span>
+<span class="nc" id="L353">                alertMsg = rb.getString(&quot;upcomingappt1&quot;) + customerName + rb.getString(&quot;upcomingappt2&quot;);          </span>
+<span class="nc bnc" id="L354" title="All 2 branches missed.">                if(secondDiff &gt;= 60)</span>
+<span class="nc" id="L355">                    alertMsg = alertMsg + minuteDiff + rb.getString(&quot;upcomingappt3min&quot;);</span>
+                else
+<span class="nc" id="L357">                    alertMsg = alertMsg + secondDiff + rb.getString(&quot;upcomingappt3sec&quot;);</span>
+            }
+            else{
+<span class="nc" id="L360">                alertMsg = rb.getString(&quot;recentappt1&quot;) + customerName + rb.getString(&quot;recentappt2&quot;);</span>
+<span class="nc bnc" id="L361" title="All 2 branches missed.">                if(secondDiff &lt;= -60)</span>
+<span class="nc" id="L362">                    alertMsg = alertMsg + minuteDiff*-1 + rb.getString(&quot;recentappt3min&quot;);</span>
+                else
+<span class="nc" id="L364">                    alertMsg = alertMsg + secondDiff*-1 + rb.getString(&quot;recentappt3sec&quot;);</span>
+            }
+            
+<span class="nc" id="L367">            alertMsg = alertMsg + localDateTimeToUITime(apptTime);</span>
+            
+<span class="nc" id="L369">            return alertMsg;</span>
+        }
+        
+<span class="nc" id="L372">        return &quot;&quot;;</span>
+    }
+    
+    //&lt;/editor-fold&gt;
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

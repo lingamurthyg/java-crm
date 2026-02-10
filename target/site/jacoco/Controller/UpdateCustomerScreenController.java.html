@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UpdateCustomerScreenController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Java CRM Application</a> &gt; <a href="index.source.html" class="el_package">Controller</a> &gt; <span class="el_source">UpdateCustomerScreenController.java</span></div><h1>UpdateCustomerScreenController.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package Controller;
+
+import DAO.AddressDaoImpl;
+import DAO.CityDaoImpl;
+import DAO.CountryDaoImpl;
+import DAO.CustomerDaoImpl;
+import Model.Address;
+import Model.City;
+import Model.Country;
+import Model.Customer;
+import java.net.URL;
+import java.sql.SQLException;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+
+/**
+ * Controls logic for updating customer
+ *
+ * @author Austin Wong
+ */
+<span class="fc" id="L36">public class UpdateCustomerScreenController extends GeneralController implements Initializable {</span>
+
+    		
+    //&lt;editor-fold defaultstate=&quot;collapsed&quot; desc=&quot;ui-variables&quot;&gt;
+    
+    @FXML
+    private TextField customerNameTxt;
+    @FXML
+    private TextField addressTxt;
+    @FXML
+    private TextField address2Txt;
+    @FXML
+    private TextField postalCodeTxt;
+    @FXML
+    private TextField cityTxt;
+    @FXML
+    private TextField countryTxt;
+    @FXML
+    private TextField phoneTxt;
+    @FXML
+    private Button saveBtn;
+    @FXML
+    private Button backBtn;
+    @FXML
+    private Label errorLbl;
+    
+    //&lt;/editor-fold&gt;
+
+    private Customer customer;
+    
+    //&lt;editor-fold defaultstate=&quot;collapsed&quot; desc=&quot;actions&quot;&gt;
+    
+    // Save updated customer
+    @FXML
+    private void onActionSave(ActionEvent event) {
+<span class="nc" id="L71">        submit(event);</span>
+<span class="nc" id="L72">    }</span>
+
+    // Return to previous screen
+    @FXML
+    private void onActionReturn(ActionEvent event) {
+<span class="nc" id="L77">        back(event);</span>
+<span class="nc" id="L78">    }</span>
+    
+    @FXML
+    private void onKeyPressedSubmit(KeyEvent event){
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        if(event.getCode() == KeyCode.ENTER){</span>
+<span class="nc" id="L83">            submit(event);</span>
+        }
+<span class="nc" id="L85">    }</span>
+    
+    //&lt;/editor-fold&gt;
+    
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+        
+        // Pre-populate fields
+<span class="nc" id="L93">        customer = Customer.getCurrentCustomer();</span>
+<span class="nc" id="L94">        customerNameTxt.setText(customer.getCustomerName());</span>
+<span class="nc" id="L95">        addressTxt.setText(customer.getAddress());</span>
+<span class="nc" id="L96">        address2Txt.setText(customer.getAddress2());</span>
+<span class="nc" id="L97">        postalCodeTxt.setText(customer.getPostalCode());</span>
+<span class="nc" id="L98">        cityTxt.setText(customer.getCity());</span>
+<span class="nc" id="L99">        countryTxt.setText(customer.getCountry());</span>
+<span class="nc" id="L100">        phoneTxt.setText(customer.getPhone());</span>
+        
+<span class="nc" id="L102">    }    </span>
+    
+    // Updates DB with updated customer data
+    private void updateDB(Event event) {
+        
+        // Gather input text
+<span class="nc" id="L108">        String countryName = countryTxt.getText();</span>
+<span class="nc" id="L109">        String cityName = cityTxt.getText();</span>
+<span class="nc" id="L110">        String addressName = addressTxt.getText();</span>
+<span class="nc" id="L111">        String address2Name = address2Txt.getText();</span>
+<span class="nc" id="L112">        String postalCode = postalCodeTxt.getText();</span>
+<span class="nc" id="L113">        String phone = phoneTxt.getText();</span>
+<span class="nc" id="L114">        String customerName = customerNameTxt.getText();</span>
+        
+        // Attempt to update customer to DB
+        try{
+
+            // Look for existing country in DB, if not found create one
+            // (we don't want to change the country for a given countryId b/c it may affect other records)
+<span class="nc" id="L121">            Country country = CountryDaoImpl.getCountry(countryName);</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">            if(!(country instanceof Country))</span>
+<span class="nc" id="L123">                country = CountryDaoImpl.insertCountry(countryName);</span>
+
+            // Look for existing city in DB, if not found create one
+<span class="nc" id="L126">            City city = CityDaoImpl.getCity(cityName, country.getCountryId());</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">            if(!(city instanceof City))</span>
+<span class="nc" id="L128">                city = CityDaoImpl.insertCity(cityName, country.getCountryId());</span>
+
+            // Look for existing address in DB, if not found create one
+            // If only the phone # changes, we still create a new row because
+            //    there could be multiple customers at the same physical location (office building)
+            //    with different phone #s, so changing the phone # for a given addressId might have
+            //    unintended effects for other customers with the same addressId
+<span class="nc" id="L135">            Address address = AddressDaoImpl.getAddress(addressName, address2Name, city.getCityId(), postalCode, phone);</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">            if(!(address instanceof Address))</span>
+<span class="nc" id="L137">                address = AddressDaoImpl.insertAddress(addressName, address2Name, city.getCityId(), postalCode, phone);</span>
+
+            // Update customerName and addressId
+<span class="nc" id="L140">            CustomerDaoImpl.updateCustomer(customerName, address.getAddressId(), customer.getCustomerId());</span>
+<span class="nc" id="L141">            displayNotification(event, &quot;Customer updated&quot;);</span>
+<span class="nc" id="L142">            back(event);</span>
+        }
+<span class="nc" id="L144">        catch (SQLException e){</span>
+<span class="nc" id="L145">            Logger.getLogger(&quot;errorlog.txt&quot;).log(Level.WARNING,null,e);</span>
+<span class="nc" id="L146">            displayErrorAlert(&quot;Error updating customer to database&quot;);</span>
+<span class="nc" id="L147">        }</span>
+<span class="nc" id="L148">    }  </span>
+    
+    private void submit(Event event){
+        
+<span class="nc bnc" id="L152" title="All 2 branches missed.">        if(checkFields(customerNameTxt,addressTxt,postalCodeTxt,cityTxt,countryTxt,phoneTxt)){</span>
+<span class="nc" id="L153">            displayMessage(errorLbl,errorStr);</span>
+<span class="nc" id="L154">            return;</span>
+        }
+        
+<span class="nc bnc" id="L157" title="All 2 branches missed.">        assert (!(customerNameTxt.getText().isEmpty()));</span>
+        
+<span class="nc" id="L159">        updateDB(event);</span>
+<span class="nc" id="L160">    }</span>
+    
+    private void back(Event event){
+<span class="nc" id="L163">        Customer.setCurrentCustomer(null);</span>
+<span class="nc" id="L164">        returnToLastScreen(event);</span>
+<span class="nc" id="L165">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

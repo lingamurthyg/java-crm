@@ -1,0 +1,4 @@
+--patch-module
+javacrm=_
+--add-reads
+javacrm=ALL-UNNAMED

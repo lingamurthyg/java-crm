@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TestConditions.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Java CRM Application</a> &gt; <a href="index.source.html" class="el_package">Controller</a> &gt; <span class="el_source">TestConditions.java</span></div><h1>TestConditions.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package Controller;
+
+import DAO.AddressDaoImpl;
+import DAO.AppointmentDaoImpl;
+import DAO.CityDaoImpl;
+import DAO.CountryDaoImpl;
+import DAO.CustomerDaoImpl;
+import DAO.UserDaoImpl;
+import Model.Address;
+import Model.Appointment;
+import Model.City;
+import Model.Country;
+import Model.Customer;
+import static Utilities.TimeFiles.localDateTimeToUITime;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.concurrent.ThreadLocalRandom;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
+/**
+ *
+ * @author Austin Wong
+ */
+<span class="nc" id="L34">public class TestConditions {</span>
+    
+<span class="fc" id="L36">    public static ObservableList&lt;Customer&gt; testCustomers = FXCollections.observableArrayList();</span>
+<span class="fc" id="L37">    public static ObservableList&lt;Appointment&gt; testAppointments = FXCollections.observableArrayList();</span>
+    
+    public static void deleteTestCustomers() throws SQLException {
+        
+<span class="nc bnc" id="L41" title="All 2 branches missed.">        for(Customer c : testCustomers){</span>
+<span class="nc" id="L42">            CustomerDaoImpl.deleteCustomer(c.getCustomerId());</span>
+<span class="nc" id="L43">        }</span>
+        
+<span class="nc" id="L45">    }</span>
+    
+    public static void deleteAppointments() throws SQLException {
+        
+<span class="nc bnc" id="L49" title="All 2 branches missed.">        for (Appointment a : testAppointments){</span>
+<span class="nc" id="L50">            AppointmentDaoImpl.deleteAppointment(a.getAppointmentId());</span>
+<span class="nc" id="L51">        }</span>
+        
+<span class="nc" id="L53">    }</span>
+    
+    public static void cleanUp() throws SQLException {
+        
+<span class="nc" id="L57">        deleteAppointments();</span>
+<span class="nc" id="L58">        deleteTestCustomers();</span>
+        
+<span class="nc" id="L60">    }</span>
+    
+    public static void createTestCustomer() throws SQLException, FileNotFoundException, IOException {
+        
+        // SET USER
+<span class="nc" id="L65">        UserDaoImpl.logIn(&quot;test&quot;, &quot;test&quot;);</span>
+        
+        // CUSTOMER PROFILE
+        
+        //Randomize suffix
+<span class="nc" id="L70">        int rand = ThreadLocalRandom.current().nextInt(100);</span>
+<span class="nc" id="L71">        String customerName = &quot;John Wick &quot; + rand;</span>
+<span class="nc" id="L72">        String countryName = &quot;USA&quot;;</span>
+<span class="nc" id="L73">        String cityName = &quot;Houston&quot;;</span>
+<span class="nc" id="L74">        String addressName = &quot;956 Main St&quot;;</span>
+<span class="nc" id="L75">        String address2Name = &quot;Apt No. 3&quot;;</span>
+<span class="nc" id="L76">        String postalCode = &quot;80210&quot;;</span>
+<span class="nc" id="L77">        String phone = &quot;854-908-7889&quot;;</span>
+        
+        
+        // ADD CUSTOMER
+<span class="nc" id="L81">        Country country = CountryDaoImpl.getCountry(countryName);</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        if(!(country instanceof Country))</span>
+<span class="nc" id="L83">            country = CountryDaoImpl.insertCountry(countryName);</span>
+
+        // Look for existing city in DB, if not found create one
+<span class="nc" id="L86">        City city = CityDaoImpl.getCity(cityName, country.getCountryId());</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        if(!(city instanceof City))</span>
+<span class="nc" id="L88">            city = CityDaoImpl.insertCity(cityName, country.getCountryId());</span>
+
+        // Look for existing address in DB, if not found create one
+<span class="nc" id="L91">        Address address = AddressDaoImpl.getAddress(addressName, address2Name, city.getCityId(), postalCode, phone);</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">        if(!(address instanceof Address))</span>
+<span class="nc" id="L93">            address = AddressDaoImpl.insertAddress(addressName, address2Name, city.getCityId(), postalCode, phone);</span>
+
+        // Look for existing customer in DB, if not found create one
+<span class="nc" id="L96">        Customer customer = CustomerDaoImpl.getCustomer(customerName, address.getAddressId());</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        if(!(customer instanceof Customer)){</span>
+<span class="nc" id="L98">            customer = CustomerDaoImpl.insertCustomer(customerName, address.getAddressId());</span>
+        }
+        
+        
+        // SET CUSTOMER
+<span class="nc" id="L103">        Customer.setCurrentCustomer(customer);</span>
+        
+        
+        // APPOINTMENT SETTINGS
+        
+        //Randomize Time and Date
+<span class="nc" id="L109">        int randMonth = ThreadLocalRandom.current().nextInt(1,13);</span>
+<span class="nc" id="L110">        int randDay = ThreadLocalRandom.current().nextInt(1,29);</span>
+<span class="nc" id="L111">        int year = 2020;</span>
+<span class="nc" id="L112">        int randMin = ThreadLocalRandom.current().nextInt(2)*30;</span>
+<span class="nc" id="L113">        int randHour = ThreadLocalRandom.current().nextInt(8,17);</span>
+        
+<span class="nc" id="L115">        LocalDateTime startDateTime = LocalDateTime.of(LocalDate.of(year, randMonth, randDay), LocalTime.of(randHour, randMin));</span>
+<span class="nc" id="L116">        LocalDateTime endDateTime = startDateTime.plusMinutes(30);</span>
+<span class="nc" id="L117">        String title = &quot;Meet and Greet&quot;;</span>
+<span class="nc" id="L118">        String description = &quot;Meet others, greet others&quot;;</span>
+<span class="nc" id="L119">        String location = &quot;Office&quot;;</span>
+<span class="nc" id="L120">        String contact = &quot;No&quot;;</span>
+<span class="nc" id="L121">        String type = &quot;Casual&quot;;</span>
+<span class="nc" id="L122">        String url = &quot;Not Applicable&quot;;</span>
+        
+        // ADD APPOINTMENT
+<span class="nc" id="L125">        Appointment appointment = AppointmentDaoImpl.getAppointment(startDateTime, endDateTime);</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">        if(!(appointment instanceof Appointment)){</span>
+<span class="nc" id="L127">            appointment = AppointmentDaoImpl.insertAppointment(title, description, location, contact, type, url, startDateTime, endDateTime);</span>
+        }
+        
+        // SET APPOINTMENT
+<span class="nc" id="L131">        Appointment.setCurrentAppointment(appointment);</span>
+        
+        // ADD TO LIST
+<span class="nc" id="L134">        testCustomers.add(customer);</span>
+<span class="nc" id="L135">        testAppointments.add(appointment);</span>
+        
+<span class="nc" id="L137">        System.out.println(customer.getCustomerName() + &quot; : &quot; + localDateTimeToUITime(appointment.getStart()));</span>
+<span class="nc" id="L138">    }  </span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
