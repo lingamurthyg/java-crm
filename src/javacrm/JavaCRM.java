@@ -30,7 +30,8 @@ public class JavaCRM extends Application {
         RBMain.setRb();
         
         prepStage(stage);
-        Parent root = FXMLLoader.load(getClass().getResource("/View/LoginScreen.fxml"),RBMain.getRb());
+        String viewPath = System.getenv().getOrDefault("VIEW_PATH", "/View/");
+        Parent root = FXMLLoader.load(getClass().getResource(viewPath + "LoginScreen.fxml"),RBMain.getRb());
         Scene scene = new Scene(root,WindowSizing.getWidth(stage),WindowSizing.getHeight(stage));
         scene.getStylesheets().add("Resources/generalStylesheet.css");
         root.requestFocus(); // Prevent username textfield from being focused upon initialization

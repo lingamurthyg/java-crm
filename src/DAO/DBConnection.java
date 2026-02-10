@@ -22,18 +22,22 @@ public class DBConnection {
     // JDBC URL parts
     private static final String protocol = "jdbc";
     private static final String vendorName = ":mysql:";
-    private static final String ipAddress = "//3.227.166.251/U07k1T";
-    
+
+    // Database connection parameters from environment variables
+    private static final String dbHost = System.getenv().getOrDefault("DB_HOST", "3.227.166.251");
+    private static final String dbPort = System.getenv().getOrDefault("DB_PORT", "3306");
+    private static final String dbName = System.getenv().getOrDefault("DB_NAME", "U07k1T");
+
     // JDBC URL
-    private static final String jdbcURL = protocol + vendorName + ipAddress;
-    
+    private static final String jdbcURL = protocol + vendorName + "//" + dbHost + ":" + dbPort + "/" + dbName;
+
     // Driver and Connection Interface Reference
     private static final String MYSQLJDBCDriver = "com.mysql.jdbc.Driver";
     private static Connection conn = null;
-    
-    // Username and Password
-    private static final String username = "U07k1T";
-    private static final String password = "53689053296";
+
+    // Username and Password from environment variables
+    private static final String username = System.getenv().getOrDefault("DB_USERNAME", "U07k1T");
+    private static final String password = System.getenv().getOrDefault("DB_PASSWORD", "53689053296");
     
     //</editor-fold>
     
@@ -45,7 +49,7 @@ public class DBConnection {
         }
         catch(ClassNotFoundException | SQLException e){
             System.out.println(e.getMessage());
-            Logger.getLogger("errorlog.txt").log(Level.SEVERE,null,e);
+            Logger.getLogger(DBConnection.class.getName()).log(Level.SEVERE,null,e);
         }
         
         return conn;

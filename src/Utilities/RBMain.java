@@ -25,8 +25,9 @@ public class RBMain {
             Locale.setDefault(Locale.ENGLISH);
         
         //Locale.setDefault(new Locale("es")); // ***AAW: Test Spanish locale (Not in place of but in addition to changing system settings)
-        
-        rb = ResourceBundle.getBundle("Utilities/Nat",Locale.getDefault());        
+
+        String baseBundle = System.getenv().getOrDefault("I18N_BUNDLE_PATH", "Utilities/Nat");
+        rb = ResourceBundle.getBundle(baseBundle,Locale.getDefault());        
         
     }
     

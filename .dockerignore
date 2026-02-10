@@ -1,0 +1,73 @@
+=== .dockerignore ===
+# Git files
+.git/
+.gitignore
+.gitattributes
+
+# Build artifacts
+dist/
+build/
+target/
+out/
+*.class
+*.jar
+*.war
+*.ear
+
+# IDE files
+.idea/
+.vscode/
+.eclipse/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+nbproject/private/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+README*
+LICENSE*
+img/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+# Archives
+*.zip
+*.tar
+*.gz
+*.rar
+
+# Maven wrapper (not used)
+mvnw
+mvnw.cmd
+.mvn/
+
+# Gradle wrapper (not used)
+gradlew
+gradlew.bat
+gradle/wrapper/
+
+# Test files
+test/
+tests/
+*_test.java
+
+# Config files (managed via environment)
+*.properties
+*.yml
+*.yaml
