@@ -28,7 +28,7 @@ public class DBConnection {
     private static final String jdbcURL = protocol + vendorName + ipAddress;
     
     // Driver and Connection Interface Reference
-    private static final String MYSQLJDBCDriver = "com.mysql.jdbc.Driver";
+    private static final String MYSQLJDBCDriver = "com.mysql.cj.jdbc.Driver";
     private static Connection conn = null;
     
     // Username and Password
@@ -38,18 +38,19 @@ public class DBConnection {
     //</editor-fold>
     
     public static Connection startConnection(){
-        
+
         try{
-            Class.forName(MYSQLJDBCDriver);
-            conn = (Connection) DriverManager.getConnection(jdbcURL, username, password);
+            // Class.forName() is no longer required for JDBC 4.0+ drivers
+            // The DriverManager automatically loads drivers from classpath
+            conn = DriverManager.getConnection(jdbcURL, username, password);
         }
-        catch(ClassNotFoundException | SQLException e){
+        catch(SQLException e){
             System.out.println(e.getMessage());
             Logger.getLogger("errorlog.txt").log(Level.SEVERE,null,e);
         }
-        
+
         return conn;
-        
+
     }
     
     public static Connection getConnection(){
