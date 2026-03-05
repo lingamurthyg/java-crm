@@ -19,17 +19,15 @@ public class RBMain {
     private static ResourceBundle rb;
     
     public static void setRb(){
-
+        
         // Default to English if neither English nor Spanish is detected
         if(!(Locale.getDefault().getLanguage().equals("en") || Locale.getDefault().getLanguage().equals("es")))
             Locale.setDefault(Locale.ENGLISH);
-
+        
         //Locale.setDefault(new Locale("es")); // ***AAW: Test Spanish locale (Not in place of but in addition to changing system settings)
-
-        String localeEnv = System.getenv("APP_LOCALE");
-        Locale locale = (localeEnv != null) ? Locale.forLanguageTag(localeEnv) : Locale.getDefault();
-        rb = ResourceBundle.getBundle("Utilities/Nat", locale);
-
+        
+        rb = ResourceBundle.getBundle("Utilities/Nat",Locale.getDefault());        
+        
     }
     
     public static ResourceBundle getRb(){

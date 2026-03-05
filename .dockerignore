@@ -1,0 +1,52 @@
+# Build artifacts
+target/
+build/
+dist/
+*.jar
+*.war
+*.class
+
+# Maven wrapper (use system mvn)
+mvnw
+mvnw.cmd
+.mvn/
+
+# Gradle wrapper (use system gradle)
+gradlew
+gradlew.bat
+gradle/wrapper/
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+.project
+.classpath
+.settings/
+nbproject/private/
+
+# Version control
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+README*
+LICENSE
+docs/
+img/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+*.bak
+
+# Test files
+test/
+*.test

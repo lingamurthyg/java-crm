@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: java-crm
+  labels:
+    name: java-crm
+    app: java-crm
+    environment: production
